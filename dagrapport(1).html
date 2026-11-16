@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F3A5F">
+<title>Dagrapport</title>
+<style>
+:root{--ink:#1B2430;--muted:#5B6573;--line:#E1DED6;--bg:#F4F3EF;--card:#fff;--navy:#1F3A5F;--ok:#1B5E34;--okbg:#DDF1E3;--todo:#6B4E00;--todobg:#FFF0B8;--bad:#8A1C13;--badbg:#FDECEA;--regie:#FFF9E0;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+.top{background:var(--navy);color:#fff;padding:16px 16px 18px;padding-top:max(16px,env(safe-area-inset-top))}
+.top small{opacity:.8;font-size:13px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.top h1{font-size:22px;font-weight:700;margin-top:2px}
+.top .sub{opacity:.9;font-size:15px;margin-top:4px}
+.wrap{padding:12px 12px 120px;max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{font-size:17px;font-weight:700;margin-bottom:12px}
+.lab{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.in{width:100%;height:50px;border:1px solid #B9B5AB;border-radius:10px;padding:0 12px;background:#fff;font-size:16px}
+textarea.in{height:auto;min-height:72px;padding:10px 12px;resize:vertical}
+select.in{font-weight:600}
+.row{display:flex;gap:10px}
+.row>*{flex:1 1 0;min-width:0}
+.big{font-size:22px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums}
+.hint{font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 16px;border-radius:22px;border:1.5px solid #C9C5BA;background:#fff;color:var(--muted);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:#DCE6F2;border-color:var(--navy);color:var(--navy)}
+.btn{min-height:48px;padding:0 18px;border-radius:10px;border:1px solid #C9C5BA;background:#fff;font-weight:600;color:var(--navy);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.wa{background:#1F8F4E;border-color:#1F8F4E;color:#fff}
+.btn.dash{border:1.5px dashed #8A93A0;width:100%}
+.btn.sm{min-height:40px;padding:0 12px;font-size:14px}
+.btn.x{min-height:40px;width:40px;padding:0;border:none;background:transparent;color:var(--muted)}
+.btn:disabled{opacity:.45}
+.seg{display:flex;border:1px solid #C9C5BA;border-radius:10px;overflow:hidden}
+.seg button{flex:1 1 0;min-height:44px;border:none;background:#fff;font-weight:600;color:var(--navy);cursor:pointer}
+.seg button+button{border-left:1px solid #C9C5BA}
+.seg button.on{background:var(--navy);color:#fff}
+.task{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.task.regie{background:var(--regie);border-color:#E9D58A}
+.task .hd{display:flex;align-items:center;gap:6px}
+.task .hd b{font-size:13px;color:var(--muted);flex:1 1 auto}
+.tg{white-space:nowrap;display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:11px;font-size:12px;font-weight:600;background:#EEF2F7;color:#3D4B5C}
+.tg.new{background:#E6E0F5;color:#43307A}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}
+.chk input{width:22px;height:22px;margin:0;accent-color:var(--navy)}
+.calc{font-size:14px;color:#3D4B5C;font-variant-numeric:tabular-nums}
+.stat{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.sc{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:10px;font-weight:600;font-variant-numeric:tabular-nums}
+.sc.ok{background:var(--okbg);color:var(--ok)}.sc.todo{background:var(--todobg);color:var(--todo)}.sc.bad{background:var(--badbg);color:var(--bad)}
+.ovr{border-left:3px solid var(--navy);padding-left:12px;margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));z-index:10}
+.bar .in2{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.bar .btn{width:100%}
+.warn{background:var(--badbg);color:var(--bad);border-radius:10px;padding:10px 12px;font-size:14px}
+.warn ul{margin:4px 0 0 18px;padding:0}
+.okmsg{background:var(--okbg);color:var(--ok);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600}
+.empty{padding:48px 20px;text-align:center;color:var(--muted)}
+.plan{background:#EEF2F7;border-radius:10px;padding:10px 12px;font-size:14px;color:#3D4B5C}
+.en{display:block;font-style:italic;font-weight:400;color:#6B7480;font-size:.86em;line-height:1.3;letter-spacing:0;text-transform:none}
+.top .en{color:#fff;opacity:.75}
+.btn.pri .en,.btn.wa .en,.seg button.on .en{color:#fff;opacity:.8}
+.btn.two{flex-direction:column;gap:0;padding-top:6px;padding-bottom:6px;line-height:1.2}
+.seg button{padding:6px 4px;line-height:1.2}
+.chk span .en{font-weight:400}
+.sc .en{font-weight:500;opacity:.85;color:inherit}
+.okmsg .en,.warn .en{color:inherit;opacity:.8}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+var app=document.getElementById('app');
+var DAYE=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONE=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAYN=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+var MON=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+
+/* ---------- hulpjes ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pad(n){return (n<10?'0':'')+n;}
+function longD(s){var p=s.split('-'),d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));var t=DAYN[d.getUTCDay()]+' '+d.getUTCDate()+' '+MON[d.getUTCMonth()];return t.charAt(0).toUpperCase()+t.slice(1);}
+function longE(s){var p=s.split('-'),d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));return DAYE[d.getUTCDay()]+' '+d.getUTCDate()+' '+MONE[d.getUTCMonth()];}
+function b64dec(s){s=s.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/=]/g,'');while(s.length%4)s+='=';var bin=atob(s),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u);}
+function b64enc(str){var u=new TextEncoder().encode(str),bin='';for(var i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin);}
+function hash(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
+function pMin(s){
+  s=String(s==null?'':s).trim().toLowerCase().replace(',','.');if(!s)return 0;
+  var m=s.match(/^(\d+)\s*(?:u|h|:)\s*(\d{1,2})?$/);if(m)return +m[1]*60+(+(m[2]||0));
+  m=s.match(/^(\d+(?:\.\d+)?)$/);if(m)return Math.round(parseFloat(m[1])*60);
+  m=s.match(/^(\d+)\s*(?:min|m)$/);if(m)return +m[1];
+  return null;
+}
+function fDur(min){min=Math.max(0,Math.round(min||0));return Math.floor(min/60)+'u'+pad(min%60);}
+function tMin(t){var m=/^(\d{1,2}):(\d{2})$/.exec(t||'');return m?(+m[1])*60+(+m[2]):null;}
+function fmtT(m){return pad(Math.floor(m/60))+':'+pad(m%60);}
+
+/* ---------- link lezen ---------- */
+var L=null,KEY='',R=null,ui={warnOk:false,sent:false,msg:null};
+try{
+  var raw=(location.hash||'').replace(/^#/,'');
+  var mm=/(?:^|&)d=([^&]+)/.exec(raw)||/(?:[?&])d=([^&]+)/.exec(location.search||'');
+  if(mm){var code=decodeURIComponent(mm[1]);L=JSON.parse(b64dec(code));KEY='dagrapport:'+hash(code);}
+}catch(e){L=null;}
+
+function nameOf(id){
+  if(!id)return '';
+  if(id.charAt(0)==='+')return id.slice(1);
+  var a=(L.all||[]);for(var i=0;i<a.length;i++)if(a[i][0]===id)return a[i][1];
+  return id;
+}
+function names(a){return (a||[]).map(nameOf).join(', ');}
+
+function freshReport(){
+  var ppl=(L.ppl||[]).slice(),t=(L.t||[]).filter(function(x){return String(x).trim();});
+  var std=L.std||{f:'07:30',t:'16:00',b:30};
+  var r={p:L.p||'',pn:L.pn||'',r:L.r||'',ppl:ppl,std:{f:std.f||'07:30',t:std.t||'16:00',b:+std.b||0},ovr:[],dr:{m:+L.min||0,k:+L.km||0},mode:L.mode||'times',tk:[],by:ppl[0]||'',nt:''};
+  if(!t.length)t=[''];
+  var te=(L.te||[]),useEn=te.length===t.length;
+  t.forEach(function(n,i){r.tk.push({n:n,en:useEn?te[i]:'',h:0,w:ppl.slice(),rg:false,no:'',e:'',s:n?'plan':''});});
+  return r;
+}
+function load(){
+  try{var s=localStorage.getItem(KEY);if(s){var x=JSON.parse(s);if(x&&x.tk&&x.std)return x;}}catch(e){}
+  return freshReport();
+}
+var saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(R));}catch(e){}},250);}
+
+/* ---------- rekenen (zelfde regels als de planningstool) ---------- */
+function wrk(p){
+  var o=null;R.ovr.forEach(function(x){if(x.p===p)o=x;});
+  var s=o||R.std,a=tMin(s.f),b=tMin(s.t);if(a==null||b==null)return 0;
+  return Math.max(0,b-a-(+s.b||0));
+}
+function stdWork(){var a=tMin(R.std.f),b=tMin(R.std.t);return (a==null||b==null)?0:Math.max(0,b-a-(+R.std.b||0));}
+function asg(p){var t=0;R.tk.forEach(function(k){if(k.w.indexOf(p)>=0)t+=(+k.h||0);});return t;}
+function manMin(k){return (+k.h||0)*k.w.length;}
+function total(){var t=0;R.tk.forEach(function(k){t+=manMin(k);});return t;}
+function breakIdx(ends){
+  var brk=+R.std.b||0;if(!brk)return -1;var bi=-1,bd=1e9;
+  ends.forEach(function(e,i){if(e==null)return;var d=Math.abs(e-720);if(e>=660&&e<=810&&d<bd){bd=d;bi=i;}});
+  return bi;
+}
+function recalcTimes(){
+  var cur=tMin(R.std.f);if(cur==null)return;
+  var ends=R.tk.map(function(k){return tMin(k.e);}),bi=breakIdx(ends),brk=+R.std.b||0;
+  R.tk.forEach(function(k,i){var e=ends[i];if(e==null||e<=cur){k.h=0;return;}k.h=e-cur;cur=e+(i===bi?brk:0);});
+}
+function endsFromHours(){
+  var cur=tMin(R.std.f);if(cur==null)return;
+  var raw=[],t=cur,brk=+R.std.b||0;
+  R.tk.forEach(function(k){t+=(+k.h||0);raw.push((+k.h)?t:null);});
+  var bi=breakIdx(raw);
+  R.tk.forEach(function(k,i){if(raw[i]==null){k.e='';return;}var e=raw[i];if(bi>=0&&i>bi)e+=brk;k.e=fmtT(e);});
+}
+function startsOf(){
+  var cur=tMin(R.std.f),out=[],ends=R.tk.map(function(k){return tMin(k.e);}),bi=breakIdx(ends),brk=+R.std.b||0;
+  R.tk.forEach(function(k,i){out.push(cur);var e=ends[i];if(e!=null&&cur!=null&&e>cur)cur=e+(i===bi?brk:0);});
+  return out;
+}
+function problems(){
+  var p=[];
+  if(!R.ppl.length)p.push(['Er staat niemand aangeduid bij Wie was er.','Nobody is selected under Who was there.']);
+  R.ppl.forEach(function(x){var w=wrk(x),a=asg(x),n=nameOf(x);if(a<w)p.push([n+': nog '+fDur(w-a)+' niet verdeeld over de taken.',n+': '+fDur(w-a)+' not yet assigned to tasks.']);else if(a>w)p.push([n+': '+fDur(a-w)+' te veel verdeeld.',n+': '+fDur(a-w)+' too much assigned.']);});
+  R.tk.forEach(function(k,i){if((+k.h||0)>0&&!String(k.n).trim())p.push(['Taak '+(i+1)+' heeft geen naam.','Task '+(i+1)+' has no name.']);if((+k.h||0)>0&&!k.w.length)p.push(['Bij taak '+(i+1)+' is niemand aangeduid.','Nobody is selected for task '+(i+1)+'.']);});
+  return p;
+}
+
+/* ---------- tekenen ---------- */
+/* Nederlands met de Engelse vertaling eronder, in grijs schuin (zoals op het weekoverzicht) */
+function T(nl,en){return esc(nl)+'<span class="en">'+esc(en)+'</span>';}
+function TL(nl,en,forId,extra){return '<label class="lab"'+(forId?' for="'+forId+'"':'')+(extra?' style="'+extra+'"':'')+'>'+T(nl,en)+'</label>';}
+function TS(nl,en,extra){return '<span class="lab"'+(extra?' style="'+extra+'"':'')+'>'+T(nl,en)+'</span>';}
+var BRK=[0,15,30,45,60,90];
+function brkSel(id,key,val,i){
+  var o='';var vals=BRK.slice();if(vals.indexOf(+val)<0)vals.push(+val);vals.sort(function(a,b){return a-b;});
+  vals.forEach(function(v){o+='<option value="'+v+'"'+(+val===v?' selected':'')+'>'+(v?fDur(v):'Geen pauze / No break')+'</option>';});
+  return '<select class="in" id="'+id+'" data-k="'+key+'"'+(i!=null?' data-i="'+i+'"':'')+'>'+o+'</select>';
+}
+function statHTML(){
+  var h='';
+  R.ppl.forEach(function(p){var w=wrk(p),a=asg(p),cl=a===w&&w>0?'ok':(a>w?'bad':'todo');
+    var nl=fDur(a)+' van '+fDur(w)+(a>w?' · te veel':(a<w?' · nog '+fDur(w-a):' ✓')),en=fDur(a)+' of '+fDur(w)+(a>w?' · too much':(a<w?' · '+fDur(w-a)+' left':''));
+    h+='<div class="sc '+cl+'"><span>'+esc(nameOf(p))+'</span><span style="text-align:right">'+T(nl,en)+'</span></div>';});
+  return h;
+}
+function render(){
+  if(R.mode==='times')recalcTimes();
+  var h='',starts=startsOf();
+  h+='<header class="top"><small>Dagrapport · Daily report</small><h1>'+esc(R.pn||'Werf')+'</h1><div class="sub">'+esc(longD(L.d))+(L.rn?' · '+esc(L.rn):'')+'<span class="en">'+esc(longE(L.d))+'</span></div>'+(L.a?'<div class="sub" style="font-size:14px;opacity:.8">'+esc(L.a)+'</div>':'')+'</header><main class="wrap">';
+  if(ui.sent)h+='<div class="okmsg">'+T('Bericht klaargezet in WhatsApp. Is het verstuurd? Dan ben je klaar. Moet er nog iets aangepast worden, pas het hier aan en verstuur opnieuw.','Message ready in WhatsApp. Sent? Then you are done. Need to change something? Change it here and send again.')+'</div>';
+
+  /* werf */
+  var wp=[[L.p,L.pn]].concat(L.wp||[]),other=!wp.some(function(x){return x[0]===R.p&&R.p;});
+  var wo='';wp.forEach(function(x){wo+='<option value="'+esc(x[0])+'"'+(x[0]===R.p&&!other?' selected':'')+'>'+esc(x[1])+'</option>';});
+  wo+='<option value="__other"'+(other?' selected':'')+'>Andere werf… / Other site…</option>';
+  var plan='';
+  if((L.t||[]).length||L.rem){
+    plan='<div class="plan" style="margin-top:10px"><b>'+T('Planning','Schedule')+'</b><div style="margin-top:4px">'+esc((L.t||[]).join(' + ')||'–')+(L.ten?'<span class="en">'+esc(L.ten)+'</span>':'')+'</div>'+
+      (L.rem?'<div style="margin-top:8px"><b>Opmerking</b> <span class="en" style="display:inline">· Note</span><div>'+esc(L.rem)+(L.ren?'<span class="en">'+esc(L.ren)+'</span>':'')+'</div></div>':'')+'</div>';
+  }
+  h+='<section class="card">'+TL('Werf','Site','f-werf')+'<select class="in" id="f-werf" data-k="werf">'+wo+'</select>'+
+     (other?TL('Naam van de werf','Name of the site','f-werfn','margin-top:10px')+'<input class="in" id="f-werfn" data-k="werfn" value="'+esc(R.pn)+'" placeholder="Naam van de werf / Site name">':'')+plan+'</section>';
+
+  /* wie */
+  var pool=[];(L.ppl||[]).concat((L.all||[]).map(function(x){return x[0];})).concat(R.ppl).forEach(function(x){if(pool.indexOf(x)<0)pool.push(x);});
+  var planned=(L.ppl||[]);
+  h+='<section class="card"><h2>'+T('Wie was er','Who was there')+'</h2><div class="chips">';
+  pool.filter(function(x){return planned.indexOf(x)>=0||R.ppl.indexOf(x)>=0;}).forEach(function(x){var on=R.ppl.indexOf(x)>=0;h+='<button class="chip'+(on?' on':'')+'" data-a="pp" data-p="'+esc(x)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(nameOf(x))+'</button>';});
+  h+='</div><p class="hint" style="margin-top:8px">'+T('Tik op een naam om aan of uit te zetten.','Tap a name to switch it on or off.')+'</p>';
+  var rest=pool.filter(function(x){return planned.indexOf(x)<0&&R.ppl.indexOf(x)<0;});
+  var ao='<option value="">+ Iemand toevoegen… / Add someone…</option>';rest.forEach(function(x){ao+='<option value="'+esc(x)+'">'+esc(nameOf(x))+'</option>';});ao+='<option value="__new">Andere naam… / Other name…</option>';
+  h+='<div style="margin-top:10px"><label class="sr" for="f-add">Iemand toevoegen / Add someone</label><select class="in" id="f-add" data-k="addp">'+ao+'</select></div>';
+  if(ui.newp)h+='<div class="row" style="margin-top:8px"><input class="in" id="f-newp" placeholder="Naam / Name" aria-label="Naam / Name"><button class="btn pri" data-a="newp" style="flex:0 0 auto">'+T('Toevoegen','Add')+'</button></div>';
+  h+='</section>';
+
+  /* uren */
+  h+='<section class="card"><h2>'+T('Uren op de werf','Hours on site')+'</h2><div class="row"><div>'+TL('Aankomst','Arrival','f-sf')+'<input class="in" type="time" id="f-sf" data-k="sf" value="'+esc(R.std.f)+'"></div><div>'+TL('Vertrek','Departure','f-st')+'<input class="in" type="time" id="f-st" data-k="st" value="'+esc(R.std.t)+'"></div></div>'+
+     '<div class="row" style="margin-top:10px;align-items:flex-end"><div>'+TL('Pauze','Break','f-sb')+brkSel('f-sb','sb',R.std.b)+'</div><div>'+TS('Gewerkt','Worked')+'<div class="big" id="d-std">'+fDur(stdWork())+'</div></div></div>';
+  if(R.ovr.length||R.ppl.length>0){
+    h+='<div class="ovr">'+TS('Iemand kwam later of ging vroeger?','Someone arrived later or left earlier?','margin:0');
+    R.ovr.forEach(function(o,i){
+      var po='';R.ppl.forEach(function(p){po+='<option value="'+esc(p)+'"'+(p===o.p?' selected':'')+'>'+esc(nameOf(p))+'</option>';});
+      h+='<div class="card" style="padding:12px;background:#FAFAF7"><div class="row" style="align-items:flex-end"><div>'+TL('Wie','Who','o-p'+i)+'<select class="in" id="o-p'+i+'" data-k="op" data-i="'+i+'">'+po+'</select></div><button class="btn x" data-a="orm" data-i="'+i+'" aria-label="Verwijderen / Remove" style="flex:0 0 40px">✕</button></div>'+
+        '<div class="row" style="margin-top:8px"><div>'+TL('Aankomst','Arrival','o-f'+i)+'<input class="in" type="time" id="o-f'+i+'" data-k="of" data-i="'+i+'" value="'+esc(o.f)+'"></div><div>'+TL('Vertrek','Departure','o-t'+i)+'<input class="in" type="time" id="o-t'+i+'" data-k="ot" data-i="'+i+'" value="'+esc(o.t)+'"></div></div>'+
+        '<div class="row" style="margin-top:8px;align-items:flex-end"><div>'+TL('Pauze','Break','o-b'+i)+brkSel('o-b'+i,'ob',o.b,i)+'</div><div>'+TS('Gewerkt','Worked')+'<div class="big" id="d-o'+i+'">'+fDur(wrk(o.p))+'</div></div></div></div>';
+    });
+    var free=R.ppl.filter(function(p){return !R.ovr.some(function(o){return o.p===p;});});
+    if(free.length)h+='<button class="btn dash two" data-a="oadd">'+T('+ Andere uren voor iemand','+ Different hours for someone')+'</button>';
+    h+='</div>';
+  }
+  h+='</section>';
+
+  /* heenrit */
+  h+='<section class="card"><h2>'+T('Heenrit','Drive to site')+'</h2><div class="row"><div>'+TL('Rijtijd','Driving time','f-dm')+'<input class="in" id="f-dm" data-k="dm" value="'+(R.dr.m?fDur(R.dr.m):'')+'" placeholder="bv. / e.g. 1u10"></div><div>'+TL('Kilometers','Kilometres','f-dk')+'<input class="in" id="f-dk" data-k="dk" inputmode="numeric" value="'+(R.dr.k||'')+'" placeholder="bv. / e.g. 58"></div></div><p class="hint" style="margin-top:8px">'+T('Enkel de heenrit, van de stelplaats tot op de werf.','One way only, from the depot to the site.')+'</p></section>';
+
+  /* taken */
+  h+='<section class="card"><h2>'+T('Wat is er gedaan','What was done')+'</h2><div class="stat" id="d-stat">'+statHTML()+'</div>'+
+     TS('Uren invullen als','Enter hours as','margin-top:12px')+'<div class="seg"><button data-a="mode" data-m="times" class="'+(R.mode==='times'?'on':'')+'">'+T('Tot welk uur','Until what time')+'</button><button data-a="mode" data-m="hours" class="'+(R.mode==='hours'?'on':'')+'">'+T('Uren per taak','Hours per task')+'</button></div>'+
+     '<p class="hint" style="margin-top:8px">'+(R.mode==='times'?T('Vul per taak in tot welk uur eraan gewerkt is. De pauze wordt automatisch afgetrokken.','For each task, enter until what time you worked on it. The break is deducted automatically.'):T('Vul per taak het aantal uren in, bijvoorbeeld 3u30 of 3,5.','For each task, enter the number of hours, for example 3u30 or 3.5.'))+'</p>';
+  R.tk.forEach(function(k,i){
+    var togs='';R.ppl.forEach(function(p){var on=k.w.indexOf(p)>=0;togs+='<button class="chip'+(on?' on':'')+'" data-a="tw" data-i="'+i+'" data-p="'+esc(p)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(nameOf(p))+'</button>';});
+    var lt='Van '+(starts[i]!=null?fmtT(starts[i]):'…')+' tot',le='From '+(starts[i]!=null?fmtT(starts[i]):'…')+' until';
+    h+='<div class="task'+(k.rg?' regie':'')+'"><div class="hd"><b>Taak '+(i+1)+' <span class="en" style="display:inline">· Task '+(i+1)+'</span></b>'+(k.s==='plan'?'<span class="tg">Uit planning · Planned</span>':'<span class="tg new">Bijgekomen · Extra</span>')+
+       (R.tk.length>1?'<button class="btn x" data-a="tup" data-i="'+i+'" aria-label="Omhoog / Up"'+(i===0?' disabled':'')+'>↑</button><button class="btn x" data-a="tdn" data-i="'+i+'" aria-label="Omlaag / Down"'+(i===R.tk.length-1?' disabled':'')+'>↓</button>':'')+
+       '<button class="btn x" data-a="trm" data-i="'+i+'" aria-label="Taak verwijderen / Remove task">✕</button></div>'+
+       '<div><input class="in" id="t-n'+i+'" data-k="tn" data-i="'+i+'" value="'+esc(k.n)+'" placeholder="Wat is er gedaan? / What was done?" aria-label="Taak / Task '+(i+1)+'">'+(k.en&&k.s==='plan'?'<span class="en" style="margin-top:4px">'+esc(k.en)+'</span>':'')+'</div>';
+    if(R.mode==='times')h+='<div class="row" style="align-items:flex-end"><div><label class="lab" for="t-e'+i+'" id="l-e'+i+'">'+T(lt,le)+'</label><input class="in" type="time" id="t-e'+i+'" data-k="te" data-i="'+i+'" value="'+esc(k.e||'')+'"></div><div>'+TS('Uren','Hours')+'<div class="big" id="d-h'+i+'">'+fDur(k.h)+'</div></div></div>';
+    else h+='<div>'+TL('Uren','Hours','t-h'+i)+'<input class="in" id="t-h'+i+'" data-k="th" data-i="'+i+'" value="'+(k.h?fDur(k.h):'')+'" placeholder="bv. / e.g. 3u30"></div>';
+    h+='<div>'+TS('Wie werkte mee','Who worked on it')+'<div class="chips">'+togs+'</div><div class="calc" id="d-m'+i+'" style="margin-top:6px">'+manTxt(k)+'</div></div>'+
+       '<label class="chk"><input type="checkbox" data-k="trg" data-i="'+i+'"'+(k.rg?' checked':'')+'><span>'+T('Regie (extra aan te rekenen)','Extra work (charged separately)')+'</span></label>'+
+       '<textarea class="in" rows="2" data-k="tno" data-i="'+i+'" placeholder="Notitie (optioneel) / Note (optional)" aria-label="Notitie / Note '+(i+1)+'">'+esc(k.no)+'</textarea></div>';
+  });
+  h+='<button class="btn dash two" data-a="tadd" style="margin-top:12px">'+T('+ Taak toevoegen','+ Add task')+'</button><p class="calc" style="margin-top:10px;text-align:right" id="d-tot">'+totTxt()+'</p></section>';
+
+  /* afsluiten */
+  var bo='';R.ppl.forEach(function(p){bo+='<option value="'+esc(p)+'"'+(p===R.by?' selected':'')+'>'+esc(nameOf(p))+'</option>';});
+  h+='<section class="card"><h2>'+T('Afsluiten','Finish')+'</h2>'+TL('Opmerking voor kantoor (optioneel)','Note for the office (optional)','f-nt')+'<textarea class="in" id="f-nt" data-k="nt" rows="3" placeholder="bv. materiaal tekort / e.g. material short">'+esc(R.nt)+'</textarea>'+
+     TL('Ingevuld door','Filled in by','f-by','margin-top:12px')+'<select class="in" id="f-by" data-k="by">'+bo+'</select>'+
+     '<p class="hint" style="margin-top:10px">'+T('Foto\'s stuur je gewoon apart in hetzelfde WhatsApp-gesprek.','Send photos separately in the same WhatsApp chat.')+'</p>'+
+     '<button class="btn two" data-a="copy" style="width:100%;margin-top:12px">'+T('Bericht kopiëren','Copy message')+'</button>'+
+     '<button class="btn two" data-a="reset" style="width:100%;margin-top:8px;color:var(--bad)">'+T('Opnieuw beginnen','Start over')+'</button><div class="hint" id="d-msg" style="margin-top:8px">'+(ui.msg?T(ui.msg[0],ui.msg[1]):'')+'</div></section>';
+  h+='</main><div class="bar"><div class="in2" id="d-bar">'+barHTML()+'</div></div>';
+  app.innerHTML=h;
+}
+function manTxt(k){return k.w.length+' man × '+fDur(k.h)+' = <b>'+fDur(manMin(k))+'</b> manuren<span class="en">'+k.w.length+(k.w.length===1?' man':' men')+' × '+fDur(k.h)+' = '+fDur(manMin(k))+' man-hours</span>';}
+function totTxt(){return 'Totaal <b>'+fDur(total())+'</b> manuren<span class="en">Total '+fDur(total())+' man-hours</span>';}
+function barHTML(){
+  var p=problems();
+  if(p.length&&ui.warnOk)return '<div class="warn"><b>'+T('Nog niet in orde:','Not complete yet:')+'</b><ul>'+p.map(function(x){return '<li>'+T(x[0],x[1])+'</li>';}).join('')+'</ul></div><button class="btn wa two" data-a="send">'+T('Toch versturen via WhatsApp','Send via WhatsApp anyway')+'</button>';
+  return '<button class="btn wa two" data-a="send">'+T('Versturen via WhatsApp','Send via WhatsApp')+'</button>';
+}
+function derive(){
+  if(R.mode==='times'){recalcTimes();var st=startsOf();R.tk.forEach(function(k,i){set('d-h'+i,fDur(k.h));var s0=st[i]!=null?fmtT(st[i]):'…';set('l-e'+i,T('Van '+s0+' tot','From '+s0+' until'));});}
+  set('d-std',fDur(stdWork()));
+  R.ovr.forEach(function(o,i){set('d-o'+i,fDur(wrk(o.p)));});
+  set('d-stat',statHTML());
+  R.tk.forEach(function(k,i){set('d-m'+i,manTxt(k));});
+  set('d-tot',totTxt());
+  set('d-bar',barHTML());
+}
+function set(id,t){var e=document.getElementById(id);if(e)e.innerHTML=t;}
+function rerender(){var y=window.pageYOffset,ae=document.activeElement,id=ae&&ae.id;render();window.scrollTo(0,y);if(id){var e=document.getElementById(id);if(e)try{e.focus();}catch(x){}}}
+
+/* ---------- bericht ---------- */
+function payload(){
+  return {v:1,d:L.d,p:R.p,pn:R.pn,r:R.r,ppl:R.ppl,std:R.std,ovr:R.ovr,dr:R.dr,mode:R.mode,
+    tk:R.tk.filter(function(k){return String(k.n).trim()||(+k.h||0)>0;}).map(function(k){return {n:String(k.n).trim(),h:+k.h||0,w:k.w,rg:!!k.rg,no:k.no||'',e:k.e||'',s:k.s||''};}),
+    by:R.by,nt:R.nt||''};
+}
+function message(){
+  if(R.mode==='times')recalcTimes();
+  var l=[];
+  l.push('DAGRAPPORT '+(R.pn||'').toUpperCase());
+  l.push(longD(L.d)+(L.rn?' · '+L.rn:''));
+  l.push('Wie: '+(names(R.ppl)||'–'));
+  l.push('Op de werf: '+R.std.f+'–'+R.std.t+', pauze '+fDur(R.std.b)+' ('+fDur(stdWork())+')');
+  R.ovr.forEach(function(o){l.push('  '+nameOf(o.p)+': '+o.f+'–'+o.t+', pauze '+fDur(o.b)+' ('+fDur(wrk(o.p))+')');});
+  l.push('Heenrit: '+fDur(R.dr.m)+' · '+(R.dr.k||0)+' km');
+  l.push('');l.push('Gedaan:');
+  payload().tk.forEach(function(k){l.push('- '+(k.n||'(zonder naam)')+': '+fDur(k.h)+' × '+k.w.length+' man'+(k.rg?' (REGIE)':'')+(k.w.length&&k.w.length!==R.ppl.length?' ['+names(k.w)+']':''));if(k.no)l.push('  '+k.no);});
+  l.push('Totaal: '+fDur(total())+' manuren');
+  if(R.nt){l.push('');l.push('Opmerking: '+R.nt);}
+  l.push('');l.push('Ingevuld door '+(nameOf(R.by)||'–'));
+  l.push('');l.push('Code voor de planning (niet wijzigen):');
+  l.push('#DR1:'+b64enc(JSON.stringify(payload()))+'#');
+  return l.join('\n');
+}
+function copyText(t){
+  function fb(){var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(ta);return ok;}
+  if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(function(){return true;},function(){return fb();});
+  return Promise.resolve(fb());
+}
+
+/* ---------- invoer ---------- */
+function act(a,el){
+  var i=+el.dataset.i,p=el.dataset.p;
+  switch(a){
+    case 'pp':
+      var ix=R.ppl.indexOf(p);
+      if(ix>=0){R.ppl.splice(ix,1);R.ovr=R.ovr.filter(function(o){return o.p!==p;});R.tk.forEach(function(k){k.w=k.w.filter(function(x){return x!==p;});});if(R.by===p)R.by=R.ppl[0]||'';}
+      else{R.ppl.push(p);R.tk.forEach(function(k){if(k.w.indexOf(p)<0)k.w.push(p);});if(!R.by)R.by=p;}
+      break;
+    case 'newp':var nf=document.getElementById('f-newp'),nm=nf?nf.value.trim():'';if(!nm)return;var id='+'+nm;if(R.ppl.indexOf(id)<0){R.ppl.push(id);R.tk.forEach(function(k){k.w.push(id);});if(!R.by)R.by=id;}ui.newp=false;break;
+    case 'oadd':var fr=R.ppl.filter(function(x){return !R.ovr.some(function(o){return o.p===x;});});if(fr.length)R.ovr.push({p:fr[0],f:R.std.f,t:R.std.t,b:R.std.b});break;
+    case 'orm':R.ovr.splice(i,1);break;
+    case 'mode':if(R.mode!==el.dataset.m){R.mode=el.dataset.m;if(R.mode==='times')endsFromHours();}break;
+    case 'tw':var w=R.tk[i].w,wi=w.indexOf(p);if(wi>=0)w.splice(wi,1);else w.push(p);break;
+    case 'tadd':R.tk.push({n:'',h:0,w:R.ppl.slice(),rg:false,no:'',e:'',s:''});save();rerender();var nn=document.getElementById('t-n'+(R.tk.length-1));if(nn){nn.focus();nn.scrollIntoView({block:'center'});}return;
+    case 'trm':R.tk.splice(i,1);if(!R.tk.length)R.tk.push({n:'',h:0,w:R.ppl.slice(),rg:false,no:'',e:'',s:''});if(R.mode==='times')endsFromHours();break;
+    case 'tup':case 'tdn':var j=a==='tup'?i-1:i+1;if(j<0||j>=R.tk.length)return;var t=R.tk[i];R.tk[i]=R.tk[j];R.tk[j]=t;if(R.mode==='times')endsFromHours();break;
+    case 'send':
+      var pr=problems();
+      if(pr.length&&!ui.warnOk){ui.warnOk=true;set('d-bar',barHTML());return;}
+      var url='https://wa.me/'+(String(L.wa||'').replace(/\D/g,''))+'?text='+encodeURIComponent(message());
+      R.sent=Date.now();ui.sent=true;save();rerender();
+      window.location.href=url;return;
+    case 'copy':copyText(message()).then(function(ok){ui.msg=ok?['Gekopieerd. Plak het bericht in WhatsApp.','Copied. Paste the message in WhatsApp.']:['Kopiëren lukte niet op deze gsm. Gebruik de groene knop.','Copying did not work on this phone. Use the green button.'];set('d-msg',T(ui.msg[0],ui.msg[1]));});return;
+    case 'reset':
+      if(!ui.resetAsk){ui.resetAsk=true;ui.msg=['Tik nog eens op Opnieuw beginnen om alles te wissen.','Tap Start over again to clear everything.'];set('d-msg',T(ui.msg[0],ui.msg[1]));return;}
+      ui.resetAsk=false;ui.msg=null;R=freshReport();try{localStorage.removeItem(KEY);}catch(e){}ui.warnOk=false;ui.sent=false;break;
+    default:return;
+  }
+  ui.warnOk=false;
+  save();rerender();
+}
+function field(e){
+  var el=e.target,k=el.dataset&&el.dataset.k;if(!k)return;
+  var ch=e.type==='change',i=+el.dataset.i,v=el.value,struct=false;
+  switch(k){
+    case 'werf':if(!ch)return;if(v==='__other'){R.p='';R.pn='';}else{R.p=v;var wp=[[L.p,L.pn]].concat(L.wp||[]);wp.forEach(function(x){if(x[0]===v)R.pn=x[1];});}struct=true;break;
+    case 'werfn':R.pn=v;break;
+    case 'addp':if(!ch||!v)return;if(v==='__new'){ui.newp=true;}else if(R.ppl.indexOf(v)<0){R.ppl.push(v);R.tk.forEach(function(t){if(t.w.indexOf(v)<0)t.w.push(v);});}struct=true;break;
+    case 'sf':if(!ch||!v)return;R.std.f=v;break;
+    case 'st':if(!ch||!v)return;R.std.t=v;break;
+    case 'sb':if(!ch)return;R.std.b=+v||0;struct=R.mode==='times';break;
+    case 'op':if(!ch)return;R.ovr[i].p=v;struct=true;break;
+    case 'of':if(!ch||!v)return;R.ovr[i].f=v;break;
+    case 'ot':if(!ch||!v)return;R.ovr[i].t=v;break;
+    case 'ob':if(!ch)return;R.ovr[i].b=+v||0;break;
+    case 'dm':if(!ch)return;var m=pMin(v);if(m==null){el.value=R.dr.m?fDur(R.dr.m):'';return;}R.dr.m=m;el.value=m?fDur(m):'';break;
+    case 'dk':if(!ch)return;var n=Math.max(0,Math.round(+String(v).replace(',','.')||0));R.dr.k=n;el.value=n||'';break;
+    case 'tn':R.tk[i].n=v;R.tk[i].en='';break;
+    case 'te':if(!ch)return;R.tk[i].e=v;break;
+    case 'th':if(!ch)return;var m2=pMin(v);if(m2==null){el.value=R.tk[i].h?fDur(R.tk[i].h):'';return;}R.tk[i].h=m2;el.value=m2?fDur(m2):'';break;
+    case 'trg':if(!ch)return;R.tk[i].rg=el.checked;struct=true;break;
+    case 'tno':R.tk[i].no=v;break;
+    case 'nt':R.nt=v;break;
+    case 'by':if(!ch)return;R.by=v;break;
+    default:return;
+  }
+  save();
+  if(struct)rerender();else if(ch)derive();
+}
+document.addEventListener('click',function(e){var el=e.target.closest('[data-a]');if(el){e.preventDefault();act(el.dataset.a,el);}});
+document.addEventListener('input',field);
+document.addEventListener('change',field);
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='f-newp'){e.preventDefault();act('newp',e.target);}});
+
+/* ---------- start ---------- */
+if(!L||!L.d){
+  app.innerHTML='<header class="top"><small>Dagrapport · Daily report</small><h1>Geen dagrapport gevonden</h1><div class="sub"><span class="en">No daily report found</span></div></header><div class="empty"><p>'+T('Open deze pagina via de link die je van kantoor kreeg in WhatsApp.','Open this page with the link you received from the office in WhatsApp.')+'</p><p style="margin-top:12px">'+T('Werkt de link niet? Vraag een nieuwe aan.','Link not working? Ask for a new one.')+'</p></div>';
+}else{
+  R=load();
+  ui.sent=!!R.sent;
+  render();
+}
+})();
+</script>
+</body>
+</html>
