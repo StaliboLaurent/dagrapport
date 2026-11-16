@@ -44,7 +44,7 @@ select.in{font-weight:600}
 .task{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
 .task.regie{background:var(--regie);border-color:#E9D58A}
 .task .hd{display:flex;align-items:center;gap:6px}
-.task .hd b{font-size:13px;color:var(--muted);flex:1 1 auto}
+.task .hd b{font-size:13px;color:var(--muted);flex:1 1 auto;white-space:nowrap}
 .tg{white-space:nowrap;display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:11px;font-size:12px;font-weight:600;background:#EEF2F7;color:#3D4B5C}
 .tg.new{background:#E6E0F5;color:#43307A}
 .chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}
@@ -70,6 +70,7 @@ select.in{font-weight:600}
 .chk span .en{font-weight:400}
 .sc .en{font-weight:500;opacity:.85;color:inherit}
 .okmsg .en,.warn .en{color:inherit;opacity:.8}
+.en:empty{display:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 :focus-visible{outline:2px solid var(--navy);outline-offset:2px}
 </style>
@@ -123,7 +124,7 @@ function names(a){return (a||[]).map(nameOf).join(', ');}
 function freshReport(){
   var ppl=(L.ppl||[]).slice(),t=(L.t||[]).filter(function(x){return String(x).trim();});
   var std=L.std||{f:'07:30',t:'16:00',b:30};
-  var r={p:L.p||'',pn:L.pn||'',r:L.r||'',ppl:ppl,std:{f:std.f||'07:30',t:std.t||'16:00',b:+std.b||0},ovr:[],dr:{m:+L.min||0,k:+L.km||0},mode:L.mode||'times',tk:[],by:ppl[0]||'',nt:''};
+  var r={p:L.p||'',pn:L.pn||'',r:L.r||'',ppl:ppl,std:{f:std.f||'07:30',t:std.t||'16:00',b:+std.b||0},ovr:[],dr:{m:+L.min||0,k:+L.km||0},mode:'hours',tk:[],by:ppl[0]||'',nt:''};
   if(!t.length)t=[''];
   var te=(L.te||[]),useEn=te.length===t.length;
   t.forEach(function(n,i){r.tk.push({n:n,en:useEn?te[i]:'',h:0,w:ppl.slice(),rg:false,no:'',e:'',s:n?'plan':''});});
@@ -206,8 +207,8 @@ function render(){
   wo+='<option value="__other"'+(other?' selected':'')+'>Andere werf… / Other site…</option>';
   var plan='';
   if((L.t||[]).length||L.rem){
-    plan='<div class="plan" style="margin-top:10px"><b>'+T('Planning','Schedule')+'</b><div style="margin-top:4px">'+esc((L.t||[]).join(' + ')||'–')+(L.ten?'<span class="en">'+esc(L.ten)+'</span>':'')+'</div>'+
-      (L.rem?'<div style="margin-top:8px"><b>Opmerking</b> <span class="en" style="display:inline">· Note</span><div>'+esc(L.rem)+(L.ren?'<span class="en">'+esc(L.ren)+'</span>':'')+'</div></div>':'')+'</div>';
+    plan='<div class="plan" style="margin-top:10px"><b>'+T('Planning','Schedule')+'</b><div style="margin-top:4px">'+esc((L.t||[]).join(' + ')||'–')+'<span class="en" id="en-plan">'+esc(L.ten||R.ten||'')+'</span>'+'</div>'+
+      (L.rem?'<div style="margin-top:8px"><b>Opmerking</b> <span class="en" style="display:inline">· Note</span><div>'+esc(L.rem)+'<span class="en" id="en-rem">'+esc(L.ren||R.ren||'')+'</span>'+'</div></div>':'')+'</div>';
   }
   h+='<section class="card">'+TL('Werf','Site','f-werf')+'<select class="in" id="f-werf" data-k="werf">'+wo+'</select>'+
      (other?TL('Naam van de werf','Name of the site','f-werfn','margin-top:10px')+'<input class="in" id="f-werfn" data-k="werfn" value="'+esc(R.pn)+'" placeholder="Naam van de werf / Site name">':'')+plan+'</section>';
@@ -219,7 +220,7 @@ function render(){
   pool.filter(function(x){return planned.indexOf(x)>=0||R.ppl.indexOf(x)>=0;}).forEach(function(x){var on=R.ppl.indexOf(x)>=0;h+='<button class="chip'+(on?' on':'')+'" data-a="pp" data-p="'+esc(x)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(nameOf(x))+'</button>';});
   h+='</div><p class="hint" style="margin-top:8px">'+T('Tik op een naam om aan of uit te zetten.','Tap a name to switch it on or off.')+'</p>';
   var rest=pool.filter(function(x){return planned.indexOf(x)<0&&R.ppl.indexOf(x)<0;});
-  var ao='<option value="">+ Iemand toevoegen… / Add someone…</option>';rest.forEach(function(x){ao+='<option value="'+esc(x)+'">'+esc(nameOf(x))+'</option>';});ao+='<option value="__new">Andere naam… / Other name…</option>';
+  var ao='<option value="">+ Iemand toevoegen / Add</option>';rest.forEach(function(x){ao+='<option value="'+esc(x)+'">'+esc(nameOf(x))+'</option>';});ao+='<option value="__new">Andere naam… / Other name…</option>';
   h+='<div style="margin-top:10px"><label class="sr" for="f-add">Iemand toevoegen / Add someone</label><select class="in" id="f-add" data-k="addp">'+ao+'</select></div>';
   if(ui.newp)h+='<div class="row" style="margin-top:8px"><input class="in" id="f-newp" placeholder="Naam / Name" aria-label="Naam / Name"><button class="btn pri" data-a="newp" style="flex:0 0 auto">'+T('Toevoegen','Add')+'</button></div>';
   h+='</section>';
@@ -245,8 +246,8 @@ function render(){
   h+='<section class="card"><h2>'+T('Heenrit','Drive to site')+'</h2><div class="row"><div>'+TL('Rijtijd','Driving time','f-dm')+'<input class="in" id="f-dm" data-k="dm" value="'+(R.dr.m?fDur(R.dr.m):'')+'" placeholder="bv. / e.g. 1u10"></div><div>'+TL('Kilometers','Kilometres','f-dk')+'<input class="in" id="f-dk" data-k="dk" inputmode="numeric" value="'+(R.dr.k||'')+'" placeholder="bv. / e.g. 58"></div></div><p class="hint" style="margin-top:8px">'+T('Enkel de heenrit, van de stelplaats tot op de werf.','One way only, from the depot to the site.')+'</p></section>';
 
   /* taken */
-  h+='<section class="card"><h2>'+T('Wat is er gedaan','What was done')+'</h2><div class="stat" id="d-stat">'+statHTML()+'</div>'+
-     TS('Uren invullen als','Enter hours as','margin-top:12px')+'<div class="seg"><button data-a="mode" data-m="times" class="'+(R.mode==='times'?'on':'')+'">'+T('Tot welk uur','Until what time')+'</button><button data-a="mode" data-m="hours" class="'+(R.mode==='hours'?'on':'')+'">'+T('Uren per taak','Hours per task')+'</button></div>'+
+  h+='<section class="card"><h2>'+T('Wat is er gedaan','What was done')+'</h2>'+
+     TS('Uren invullen als','Enter hours as')+'<div class="seg"><button data-a="mode" data-m="times" class="'+(R.mode==='times'?'on':'')+'">'+T('Tot welk uur','Until what time')+'</button><button data-a="mode" data-m="hours" class="'+(R.mode==='hours'?'on':'')+'">'+T('Uren per taak','Hours per task')+'</button></div>'+
      '<p class="hint" style="margin-top:8px">'+(R.mode==='times'?T('Vul per taak in tot welk uur eraan gewerkt is. De pauze wordt automatisch afgetrokken.','For each task, enter until what time you worked on it. The break is deducted automatically.'):T('Vul per taak het aantal uren in, bijvoorbeeld 3u30 of 3,5.','For each task, enter the number of hours, for example 3u30 or 3.5.'))+'</p>';
   R.tk.forEach(function(k,i){
     var togs='';R.ppl.forEach(function(p){var on=k.w.indexOf(p)>=0;togs+='<button class="chip'+(on?' on':'')+'" data-a="tw" data-i="'+i+'" data-p="'+esc(p)+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(nameOf(p))+'</button>';});
@@ -254,14 +255,14 @@ function render(){
     h+='<div class="task'+(k.rg?' regie':'')+'"><div class="hd"><b>Taak '+(i+1)+' <span class="en" style="display:inline">· Task '+(i+1)+'</span></b>'+(k.s==='plan'?'<span class="tg">Uit planning · Planned</span>':'<span class="tg new">Bijgekomen · Extra</span>')+
        (R.tk.length>1?'<button class="btn x" data-a="tup" data-i="'+i+'" aria-label="Omhoog / Up"'+(i===0?' disabled':'')+'>↑</button><button class="btn x" data-a="tdn" data-i="'+i+'" aria-label="Omlaag / Down"'+(i===R.tk.length-1?' disabled':'')+'>↓</button>':'')+
        '<button class="btn x" data-a="trm" data-i="'+i+'" aria-label="Taak verwijderen / Remove task">✕</button></div>'+
-       '<div><input class="in" id="t-n'+i+'" data-k="tn" data-i="'+i+'" value="'+esc(k.n)+'" placeholder="Wat is er gedaan? / What was done?" aria-label="Taak / Task '+(i+1)+'">'+(k.en&&k.s==='plan'?'<span class="en" style="margin-top:4px">'+esc(k.en)+'</span>':'')+'</div>';
+       '<div><input class="in" id="t-n'+i+'" data-k="tn" data-i="'+i+'" value="'+esc(k.n)+'" placeholder="Wat is er gedaan? / What was done?" aria-label="Taak / Task '+(i+1)+'">'+'<span class="en" id="en-t'+i+'" style="margin-top:4px">'+esc(k.s==='plan'?(k.en||''):'')+'</span>'+'</div>';
     if(R.mode==='times')h+='<div class="row" style="align-items:flex-end"><div><label class="lab" for="t-e'+i+'" id="l-e'+i+'">'+T(lt,le)+'</label><input class="in" type="time" id="t-e'+i+'" data-k="te" data-i="'+i+'" value="'+esc(k.e||'')+'"></div><div>'+TS('Uren','Hours')+'<div class="big" id="d-h'+i+'">'+fDur(k.h)+'</div></div></div>';
     else h+='<div>'+TL('Uren','Hours','t-h'+i)+'<input class="in" id="t-h'+i+'" data-k="th" data-i="'+i+'" value="'+(k.h?fDur(k.h):'')+'" placeholder="bv. / e.g. 3u30"></div>';
     h+='<div>'+TS('Wie werkte mee','Who worked on it')+'<div class="chips">'+togs+'</div><div class="calc" id="d-m'+i+'" style="margin-top:6px">'+manTxt(k)+'</div></div>'+
-       '<label class="chk"><input type="checkbox" data-k="trg" data-i="'+i+'"'+(k.rg?' checked':'')+'><span>'+T('Regie (extra aan te rekenen)','Extra work (charged separately)')+'</span></label>'+
+       '<label class="chk" style="align-items:flex-start"><input type="checkbox" style="margin-top:2px" data-k="trg" data-i="'+i+'"'+(k.rg?' checked':'')+'><span>'+T('Regie','Extra work')+'<span class="hint" style="display:block;font-weight:400;font-size:13px;margin-top:2px">'+T('Dit is bijgekomen werk, niet voorzien.','This is additional work, not planned.')+'</span></span></label>'+
        '<textarea class="in" rows="2" data-k="tno" data-i="'+i+'" placeholder="Notitie (optioneel) / Note (optional)" aria-label="Notitie / Note '+(i+1)+'">'+esc(k.no)+'</textarea></div>';
   });
-  h+='<button class="btn dash two" data-a="tadd" style="margin-top:12px">'+T('+ Taak toevoegen','+ Add task')+'</button><p class="calc" style="margin-top:10px;text-align:right" id="d-tot">'+totTxt()+'</p></section>';
+  h+='<button class="btn dash two" data-a="tadd" style="margin-top:12px">'+T('+ Taak toevoegen','+ Add task')+'</button><p class="calc" style="margin-top:10px;text-align:right" id="d-tot">'+totTxt()+'</p>'+TS('Controle: uren per man','Check: hours per person','margin-top:14px')+'<div class="stat" id="d-stat">'+statHTML()+'</div></section>';
 
   /* afsluiten */
   var bo='';R.ppl.forEach(function(p){bo+='<option value="'+esc(p)+'"'+(p===R.by?' selected':'')+'>'+esc(nameOf(p))+'</option>';});
@@ -387,6 +388,22 @@ document.addEventListener('input',field);
 document.addEventListener('change',field);
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='f-newp'){e.preventDefault();act('newp',e.target);}});
 
+/* ---------- ontbrekende Engelse vertalingen ophalen ---------- */
+function trFetch(txt){
+  return fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt)+'&langpair=nl|en').then(function(r){return r.json();}).then(function(j){
+    var x=j&&j.responseData&&j.responseData.translatedText;if(!x||/MYMEMORY WARNING|QUERY LENGTH/i.test(x))throw new Error('tr');return x;});
+}
+function fillEn(){
+  var jobs=[];
+  if(!L.ten&&!R.ten&&(L.t||[]).length)jobs.push(function(){return trFetch(L.t.join(' + ')).then(function(x){R.ten=x;var e=document.getElementById('en-plan');if(e)e.textContent=x;});});
+  if(L.rem&&!L.ren&&!R.ren)jobs.push(function(){return trFetch(L.rem).then(function(x){R.ren=x;var e=document.getElementById('en-rem');if(e)e.textContent=x;});});
+  R.tk.forEach(function(k){
+    if(k.s==='plan'&&!k.en&&String(k.n).trim()){var n0=k.n;jobs.push(function(){return trFetch(n0).then(function(x){if(k.n!==n0)return;k.en=x;var i=R.tk.indexOf(k),e=document.getElementById('en-t'+i);if(e)e.textContent=x;});});}
+  });
+  var run=function(){var j=jobs.shift();if(!j){save();return;}j().catch(function(){}).then(function(){save();run();});};
+  run();
+}
+
 /* ---------- start ---------- */
 if(!L||!L.d){
   app.innerHTML='<header class="top"><small>Dagrapport · Daily report</small><h1>Geen dagrapport gevonden</h1><div class="sub"><span class="en">No daily report found</span></div></header><div class="empty"><p>'+T('Open deze pagina via de link die je van kantoor kreeg in WhatsApp.','Open this page with the link you received from the office in WhatsApp.')+'</p><p style="margin-top:12px">'+T('Werkt de link niet? Vraag een nieuwe aan.','Link not working? Ask for a new one.')+'</p></div>';
@@ -394,6 +411,7 @@ if(!L||!L.d){
   R=load();
   ui.sent=!!R.sent;
   render();
+  fillEn();
 }
 })();
 </script>
