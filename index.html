@@ -124,14 +124,14 @@ function names(a){return (a||[]).map(nameOf).join(', ');}
 function freshReport(){
   var ppl=(L.ppl||[]).slice(),t=(L.t||[]).filter(function(x){return String(x).trim();});
   var std=L.std||{f:'07:30',t:'16:00',b:30};
-  var r={p:L.p||'',pn:L.pn||'',r:L.r||'',ppl:ppl,std:{f:std.f||'07:30',t:std.t||'16:00',b:+std.b||0},ovr:[],dr:{m:+L.min||0,k:+L.km||0},mode:'hours',tk:[],by:ppl[0]||'',nt:''};
+  var r={p:L.p||'',pn:L.pn||'',r:L.r||'',ppl:ppl,std:{f:std.f||'07:30',t:std.t||'16:00',b:+std.b||0},ovr:[],dr:{m:+L.min||0,k:+L.km||0,s:(+L.min&&tMin(std.f||'07:30')!=null&&tMin(std.f||'07:30')>+L.min)?fmtT(tMin(std.f||'07:30')-(+L.min)):''},mode:'hours',tk:[],by:ppl[0]||'',nt:''};
   if(!t.length)t=[''];
   var te=(L.te||[]),useEn=te.length===t.length;
   t.forEach(function(n,i){r.tk.push({n:n,en:useEn?te[i]:'',h:0,w:ppl.slice(),rg:false,no:'',e:'',s:n?'plan':''});});
   return r;
 }
 function load(){
-  try{var s=localStorage.getItem(KEY);if(s){var x=JSON.parse(s);if(x&&x.tk&&x.std)return x;}}catch(e){}
+  try{var s=localStorage.getItem(KEY);if(s){var x=JSON.parse(s);if(x&&x.tk&&x.std){if(x.dr&&x.dr.s==null){var a0=tMin(x.std.f);x.dr.s=(x.dr.m&&a0!=null&&a0>x.dr.m)?fmtT(a0-x.dr.m):'';}return x;}}}catch(e){}
   return freshReport();
 }
 var saveT=null;
@@ -157,6 +157,8 @@ function recalcTimes(){
   var ends=R.tk.map(function(k){return tMin(k.e);}),bi=breakIdx(ends),brk=+R.std.b||0;
   R.tk.forEach(function(k,i){var e=ends[i];if(e==null||e<=cur){k.h=0;return;}k.h=e-cur;cur=e+(i===bi?brk:0);});
 }
+function driveMin(){var s=tMin(R.dr.s),a=tMin(R.std.f);return (s!=null&&a!=null&&a>s)?a-s:0;}
+function drTxt(){return R.dr.s?(driveMin()?fDur(driveMin())+'<span class="en" style="font-size:14px;font-weight:400">'+esc(R.dr.s)+' → '+esc(R.std.f)+'</span>':T('Startuur ligt niet vóór de aankomst','Start time is not before arrival')):'–';}
 function endsFromHours(){
   var cur=tMin(R.std.f);if(cur==null)return;
   var raw=[],t=cur,brk=+R.std.b||0;
@@ -173,6 +175,7 @@ function problems(){
   var p=[];
   if(!R.ppl.length)p.push(['Er staat niemand aangeduid bij Wie was er.','Nobody is selected under Who was there.']);
   R.ppl.forEach(function(x){var w=wrk(x),a=asg(x),n=nameOf(x);if(a<w)p.push([n+': nog '+fDur(w-a)+' niet verdeeld over de taken.',n+': '+fDur(w-a)+' not yet assigned to tasks.']);else if(a>w)p.push([n+': '+fDur(a-w)+' te veel verdeeld.',n+': '+fDur(a-w)+' too much assigned.']);});
+  if(!R.dr.s)p.push(['Startuur bij Opstart is niet ingevuld.','Start time under Start of day is not filled in.']);
   R.tk.forEach(function(k,i){if((+k.h||0)>0&&!String(k.n).trim())p.push(['Taak '+(i+1)+' heeft geen naam.','Task '+(i+1)+' has no name.']);if((+k.h||0)>0&&!k.w.length)p.push(['Bij taak '+(i+1)+' is niemand aangeduid.','Nobody is selected for task '+(i+1)+'.']);});
   return p;
 }
@@ -243,7 +246,7 @@ function render(){
   h+='</section>';
 
   /* heenrit */
-  h+='<section class="card"><h2>'+T('Heenrit','Drive to site')+'</h2><div class="row"><div>'+TL('Rijtijd','Driving time','f-dm')+'<input class="in" id="f-dm" data-k="dm" value="'+(R.dr.m?fDur(R.dr.m):'')+'" placeholder="bv. / e.g. 1u10"></div><div>'+TL('Kilometers','Kilometres','f-dk')+'<input class="in" id="f-dk" data-k="dk" inputmode="numeric" value="'+(R.dr.k||'')+'" placeholder="bv. / e.g. 58"></div></div><p class="hint" style="margin-top:8px">'+T('Enkel de heenrit, van de stelplaats tot op de werf.','One way only, from the depot to the site.')+'</p></section>';
+  h+='<section class="card"><h2>'+T('Opstart','Start of day')+'</h2><div class="row"><div>'+TL('Startuur','Start time','f-ds')+'<input class="in" type="time" id="f-ds" data-k="ds" value="'+esc(R.dr.s||'')+'"></div><div>'+TL('Kilometers','Kilometres','f-dk')+'<input class="in" id="f-dk" data-k="dk" inputmode="numeric" value="'+(R.dr.k||'')+'" placeholder="bv. / e.g. 58"></div></div><div class="row" style="margin-top:10px"><div>'+TS('Totaal opstarttijd','Total start-up time')+'<div class="big" id="d-dr">'+drTxt()+'</div></div></div></section>';
 
   /* taken */
   h+='<section class="card"><h2>'+T('Wat is er gedaan','What was done')+'</h2>'+
@@ -284,6 +287,7 @@ function barHTML(){
 function derive(){
   if(R.mode==='times'){recalcTimes();var st=startsOf();R.tk.forEach(function(k,i){set('d-h'+i,fDur(k.h));var s0=st[i]!=null?fmtT(st[i]):'…';set('l-e'+i,T('Van '+s0+' tot','From '+s0+' until'));});}
   set('d-std',fDur(stdWork()));
+  set('d-dr',drTxt());
   R.ovr.forEach(function(o,i){set('d-o'+i,fDur(wrk(o.p)));});
   set('d-stat',statHTML());
   R.tk.forEach(function(k,i){set('d-m'+i,manTxt(k));});
@@ -295,6 +299,7 @@ function rerender(){var y=window.pageYOffset,ae=document.activeElement,id=ae&&ae
 
 /* ---------- bericht ---------- */
 function payload(){
+  R.dr.m=driveMin();
   return {v:1,d:L.d,p:R.p,pn:R.pn,r:R.r,ppl:R.ppl,std:R.std,ovr:R.ovr,dr:R.dr,mode:R.mode,
     tk:R.tk.filter(function(k){return String(k.n).trim()||(+k.h||0)>0;}).map(function(k){return {n:String(k.n).trim(),h:+k.h||0,w:k.w,rg:!!k.rg,no:k.no||'',e:k.e||'',s:k.s||''};}),
     by:R.by,nt:R.nt||''};
@@ -307,7 +312,7 @@ function message(){
   l.push('Wie: '+(names(R.ppl)||'–'));
   l.push('Op de werf: '+R.std.f+'–'+R.std.t+', pauze '+fDur(R.std.b)+' ('+fDur(stdWork())+')');
   R.ovr.forEach(function(o){l.push('  '+nameOf(o.p)+': '+o.f+'–'+o.t+', pauze '+fDur(o.b)+' ('+fDur(wrk(o.p))+')');});
-  l.push('Heenrit: '+fDur(R.dr.m)+' · '+(R.dr.k||0)+' km');
+  l.push('Opstart: vertrek '+(R.dr.s||'–')+', totaal opstarttijd '+fDur(driveMin())+' · '+(R.dr.k||0)+' km');
   l.push('');l.push('Gedaan:');
   payload().tk.forEach(function(k){l.push('- '+(k.n||'(zonder naam)')+': '+fDur(k.h)+' × '+k.w.length+' man'+(k.rg?' (REGIE)':'')+(k.w.length&&k.w.length!==R.ppl.length?' ['+names(k.w)+']':''));if(k.no)l.push('  '+k.no);});
   l.push('Totaal: '+fDur(total())+' manuren');
@@ -370,6 +375,7 @@ function field(e){
     case 'ot':if(!ch||!v)return;R.ovr[i].t=v;break;
     case 'ob':if(!ch)return;R.ovr[i].b=+v||0;break;
     case 'dm':if(!ch)return;var m=pMin(v);if(m==null){el.value=R.dr.m?fDur(R.dr.m):'';return;}R.dr.m=m;el.value=m?fDur(m):'';break;
+    case 'ds':if(!ch)return;R.dr.s=v||'';break;
     case 'dk':if(!ch)return;var n=Math.max(0,Math.round(+String(v).replace(',','.')||0));R.dr.k=n;el.value=n||'';break;
     case 'tn':R.tk[i].n=v;R.tk[i].en='';break;
     case 'te':if(!ch)return;R.tk[i].e=v;break;
