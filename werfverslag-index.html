@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1F3A5F">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Werfverslag</title>
+<style>
+:root{--ink:#1B2430;--muted:#5B6573;--line:#E1DED6;--bg:#F4F3EF;--card:#fff;--navy:#1F3A5F;--ok:#1B5E34;--okbg:#DDF1E3;--bad:#8A1C13;--badbg:#FDECEA;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+.top{background:var(--navy);color:#fff;padding:16px 16px 18px;padding-top:max(16px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.top .t{flex:1 1 auto;min-width:0}
+.top small{opacity:.8;font-size:13px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.top h1{font-size:22px;font-weight:700;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .sub{opacity:.9;font-size:15px;margin-top:2px}
+.top .back{min-height:44px;min-width:44px;border:none;background:rgba(255,255,255,.12);color:#fff;border-radius:10px;font-weight:600;padding:0 12px;cursor:pointer}
+.wrap{padding:12px 12px 130px;max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{font-size:17px;font-weight:700;margin-bottom:10px}
+.lab{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.in{width:100%;height:50px;border:1px solid #B9B5AB;border-radius:10px;padding:0 12px;background:#fff;font-size:16px}
+textarea.in{height:auto;min-height:96px;padding:10px 12px;resize:vertical;line-height:1.4}
+.row{display:flex;gap:10px}
+.row>*{flex:1 1 0;min-width:0}
+.hint{font-size:14px;color:var(--muted)}
+.btn{min-height:48px;padding:0 18px;border-radius:10px;border:1px solid #C9C5BA;background:#fff;font-weight:600;color:var(--navy);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.wa{background:#1F8F4E;border-color:#1F8F4E;color:#fff}
+.btn.dash{border:1.5px dashed #8A93A0;width:100%}
+.btn.sm{min-height:40px;padding:0 12px;font-size:14px}
+.btn.dng{color:var(--bad)}
+.btn.full{width:100%}
+.btn:disabled{opacity:.45}
+.btn svg{width:20px;height:20px;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{min-height:38px;padding:0 14px;border-radius:19px;border:1.5px solid #C9C5BA;background:#fff;color:var(--muted);font-weight:600;cursor:pointer;font-size:14px}
+.chip.on{background:#DCE6F2;border-color:var(--navy);color:var(--navy)}
+.pt{display:flex;flex-direction:column;gap:12px}
+.pt .hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pt .hd b{font-size:17px}
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ph div{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#E8E6DF}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph button{position:absolute;top:4px;right:4px;width:34px;height:34px;border-radius:17px;border:none;background:rgba(27,36,48,.72);color:#fff;font-size:18px;line-height:1;cursor:pointer}
+.pbtn{display:flex;gap:8px}
+.pbtn label{flex:1 1 0}
+.pbtn input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;cursor:pointer;min-height:64px}
+.item .m{flex:1 1 auto;min-width:0}
+.item b{display:block;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item span.s{display:block;font-size:14px;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:8px}
+.tg{white-space:nowrap;display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;font-size:12px;font-weight:600;background:#EEF2F7;color:#3D4B5C}
+.tg.ok{background:var(--okbg);color:var(--ok)}
+.tg.new{background:#E6E0F5;color:#43307A}
+.grp{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:6px 2px 0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));z-index:10}
+.bar .in2{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.bar .btn{width:100%}
+.warn{background:var(--badbg);color:var(--bad);border-radius:10px;padding:10px 12px;font-size:14px}
+.okmsg{background:var(--okbg);color:var(--ok);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom));max-width:616px;margin:0 auto;background:#1B2430;color:#fff;border-radius:12px;padding:12px 14px;font-size:15px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.empty{padding:28px 12px;text-align:center;color:var(--muted)}
+.busy{position:fixed;inset:0;background:rgba(244,243,239,.75);display:flex;align-items:center;justify-content:center;z-index:30;font-weight:700;color:var(--navy);font-size:17px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- werfverslag: pdf met foto's + ingebedde gegevens (gedeeld door gsm-app en planningstool) ---------- */
+var WV=(function(){
+var WR='278 278 355 556 556 889 667 191 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 278 278 584 584 584 556 1015 667 667 722 722 667 611 778 722 278 500 667 556 833 722 778 667 778 722 667 611 722 667 944 667 667 611 278 278 278 469 556 333 556 556 500 556 556 278 556 556 222 222 500 222 833 556 556 556 556 333 500 278 556 500 722 500 500 500 334 260 334 584'.split(' ').map(Number);
+var WB='278 333 474 556 556 889 722 238 333 333 389 584 278 333 278 278 556 556 556 556 556 556 556 556 556 556 333 333 584 584 584 611 975 722 722 722 722 667 611 778 722 278 556 722 611 833 722 778 667 778 722 667 611 722 667 944 667 667 611 333 278 333 584 556 333 556 611 556 611 556 333 611 611 278 278 556 278 889 611 611 611 611 389 556 333 611 556 778 556 556 500 389 280 389 584'.split(' ').map(Number);
+var SPEC={8211:150,8212:151,8217:146,8216:145,8220:147,8221:148,8226:149,8230:133,8364:128};
+var DAYN=['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+var MON=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+var NAVY='#1F3A5F',INK='#1B2430',GREY='#5B6573',LINE='#D9D5CC',OK='#1E6B3A';
+var IO=6; /* eerste objectnummer van de foto's */
+
+function enc(s){var o='';s=String(s);for(var i=0;i<s.length;i++){var c=s.charCodeAt(i),b=c;if(SPEC[c]!==undefined)b=SPEC[c];else if(c>255)b=63;else if(c<32)b=32;
+  if(b===40||b===41||b===92)o+='\\'+String.fromCharCode(b);else if(b<32||b>126)o+='\\'+('00'+b.toString(8)).slice(-3);else o+=String.fromCharCode(b);}return o;}
+function rgbs(hex){var n=parseInt(hex.slice(1),16);return [(n>>16)/255,((n>>8)&255)/255,(n&255)/255].map(function(v){return v.toFixed(3);}).join(' ');}
+function tw(s,size,font){var t=font==='F2'?WB:WR,w=0;s=String(s);for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);w+=(c>=32&&c<=126)?t[c-32]:(c>=192&&c<=255?(c<224?667:556):556);}return w/1000*size;}
+function wrap(s,maxW,size,font){
+  var out=[];String(s==null?'':s).replace(/\r/g,'').split('\n').forEach(function(par){
+    var words=par.split(/\s+/).filter(Boolean),line='';
+    if(!words.length){out.push('');return;}
+    words.forEach(function(w){
+      while(tw(w,size,font)>maxW){var k=w.length;while(k>1&&tw(w.slice(0,k),size,font)>maxW)k--;if(line){out.push(line);line='';}out.push(w.slice(0,k));w=w.slice(k);}
+      var t=line?line+' '+w:w;if(tw(t,size,font)<=maxW)line=t;else{out.push(line);line=w;}
+    });
+    if(line)out.push(line);
+  });
+  while(out.length&&out[out.length-1]==='')out.pop();
+  return out;
+}
+function longD(s){if(!s)return '';var p=s.split('-'),d=new Date(Date.UTC(+p[0],+p[1]-1,+p[2]));var t=DAYN[d.getUTCDay()]+' '+d.getUTCDate()+' '+MON[d.getUTCMonth()]+' '+d.getUTCFullYear();return t.charAt(0).toUpperCase()+t.slice(1);}
+function shortD(s){if(!s)return '';var p=s.split('-');return +p[2]+'/'+(+p[1])+'/'+p[0];}
+function fileD(s){if(!s)return '';var p=s.split('-');return p[2]+'-'+p[1]+'-'+p[0];}
+function u8FromB64(b){var bin=atob(b),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
+function b64FromLatin(s){return btoa(s);}
+function utf8b64(s){var u=new TextEncoder().encode(s),bin='';for(var i=0;i<u.length;i+=32768)bin+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(bin);}
+function b64utf8(b){return new TextDecoder().decode(u8FromB64(b));}
+function latin(u8){var s='';for(var i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return s;}
+
+/* --- pdf-document --- */
+function Doc(){this.w=595.28;this.h=841.89;this.pages=[];this.imgs=[];this.add();}
+Doc.prototype.add=function(){this.cur=[];this.pages.push(this.cur);};
+Doc.prototype.rect=function(x,y,w,h,fill,stroke,lw){var c=this.cur;if(fill)c.push(rgbs(fill)+' rg');if(stroke){c.push(rgbs(stroke)+' RG');c.push((lw||0.5)+' w');}
+  c.push(x.toFixed(2)+' '+(this.h-y-h).toFixed(2)+' '+w.toFixed(2)+' '+h.toFixed(2)+' re '+(fill&&stroke?'B':fill?'f':'S'));};
+Doc.prototype.line=function(x1,y1,x2,y2,col,lw){var c=this.cur;c.push(rgbs(col||'#000000')+' RG');c.push((lw||0.5)+' w');c.push(x1.toFixed(2)+' '+(this.h-y1).toFixed(2)+' m '+x2.toFixed(2)+' '+(this.h-y2).toFixed(2)+' l S');};
+Doc.prototype.text=function(s,x,y,size,font,col,page){(page||this.cur).push(rgbs(col||INK)+' rg');(page||this.cur).push('BT /'+font+' '+size+' Tf '+x.toFixed(2)+' '+(this.h-y).toFixed(2)+' Td ('+enc(s)+') Tj ET');};
+Doc.prototype.rtext=function(s,x,y,size,font,col,page){this.text(s,x-tw(s,size,font),y,size,font,col,page);};
+/* foto: {s:dataURL jpeg, w, h} -> index */
+Doc.prototype.addImg=function(ph){
+  for(var i=0;i<this.imgs.length;i++)if(this.imgs[i].src===ph.s)return i;
+  var b=String(ph.s).replace(/^data:[^,]*,/,'');this.imgs.push({src:ph.s,b:u8FromB64(b),w:ph.w,h:ph.h});return this.imgs.length-1;};
+Doc.prototype.img=function(i,x,y,w,h){this.cur.push('q '+w.toFixed(2)+' 0 0 '+h.toFixed(2)+' '+x.toFixed(2)+' '+(this.h-y-h).toFixed(2)+' cm /Im'+i+' Do Q');};
+Doc.prototype.blob=function(data){
+  var self=this,parts=[],pos=0,offs=[],nImg=this.imgs.length,dataObj=data?IO+nImg:0,firstPage=IO+nImg+(data?1:0),N=this.pages.length,total=firstPage+N*2;
+  function S(s){var u=new Uint8Array(s.length);for(var k=0;k<s.length;k++)u[k]=s.charCodeAt(k)&255;parts.push(u);pos+=u.length;}
+  function B(u){parts.push(u);pos+=u.length;}
+  function obj(n,body){offs[n]=pos;S(n+' 0 obj\n'+body+'\nendobj\n');}
+  S('%PDF-1.4\n%âãÏÓ\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  var kids=[];for(var p=0;p<N;p++)kids.push((firstPage+p*2)+' 0 R');
+  obj(2,'<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+N+' >>');
+  ['Helvetica','Helvetica-Bold','Helvetica-Oblique'].forEach(function(f,i){obj(3+i,'<< /Type /Font /Subtype /Type1 /BaseFont /'+f+' /Encoding /WinAnsiEncoding >>');});
+  this.imgs.forEach(function(im,i){var n=IO+i;offs[n]=pos;
+    S(n+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+im.w+' /Height '+im.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+im.b.length+' >>\nstream\n');B(im.b);S('\nendstream\nendobj\n');});
+  if(data){var b64=utf8b64(JSON.stringify(data));obj(dataObj,'<< /Type /WerfverslagData /Length '+b64.length+' >>\nstream\n'+b64+'\nendstream');}
+  var xo='';if(nImg){xo=' /XObject <<';for(var j=0;j<nImg;j++)xo+=' /Im'+j+' '+(IO+j)+' 0 R';xo+=' >>';}
+  this.pages.forEach(function(c,i){var po=firstPage+i*2,body=c.join('\n');
+    obj(po,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+self.w+' '+self.h+'] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >>'+xo+' >> /Contents '+(po+1)+' 0 R >>');
+    obj(po+1,'<< /Length '+body.length+' >>\nstream\n'+body+'\nendstream');});
+  var x=pos,t='xref\n0 '+total+'\n0000000000 65535 f \n';
+  for(var n=1;n<total;n++)t+=('0000000000'+(offs[n]||0)).slice(-10)+' 00000 n \n';
+  t+='trailer\n<< /Size '+total+' /Root 1 0 R >>\nstartxref\n'+x+'\n%%EOF\n';S(t);
+  return new Blob(parts,{type:'application/pdf'});
+};
+
+/* --- opmaak --- */
+var M=40,TOP=40,BOT=50;
+function Ctx(doc,cont){this.doc=doc;this.y=0;this.cont=cont;}
+Ctx.prototype.room=function(){return this.doc.h-BOT-this.y;};
+Ctx.prototype.need=function(h){if(this.y+h>this.doc.h-BOT){this.doc.add();this.y=TOP;if(this.cont)this.cont(this);}};
+function header(doc,kicker,title,sub,right1,right2){
+  var W=doc.w,hh=sub?92:78,rw=Math.max(tw(right1||'',10,'F2'),tw(right2||'',9,'F1'));
+  doc.rect(0,0,W,hh,NAVY);
+  doc.text(kicker,M,28,9,'F2','#C9D6E8');
+  var tl=wrap(title,W-2*M-rw-20,20,'F2');doc.text(tl[0]||'',M,52,20,'F2','#FFFFFF');
+  if(sub)doc.text(wrap(sub,W-2*M-rw-20,10,'F1')[0]||'',M,72,10,'F1','#DCE4EF');
+  if(right1)doc.rtext(right1,W-M,30,10,'F2','#FFFFFF');
+  if(right2)doc.rtext(right2,W-M,46,9,'F1','#DCE4EF');
+  return hh+22;
+}
+function footer(doc,left){
+  var n=doc.pages.length;doc.pages.forEach(function(p,i){
+    doc.line(M,doc.h-34,doc.w-M,doc.h-34,LINE,0.6,p);
+    doc.text(left,M,doc.h-20,8,'F1',GREY,p);
+    doc.rtext('Pagina '+(i+1)+' van '+n,doc.w-M,doc.h-20,8,'F1',GREY,p);
+  });
+}
+/* Doc.line op een andere pagina */
+var _line=Doc.prototype.line;Doc.prototype.line=function(x1,y1,x2,y2,col,lw,page){if(!page)return _line.call(this,x1,y1,x2,y2,col,lw);var k=this.cur;this.cur=page;_line.call(this,x1,y1,x2,y2,col,lw);this.cur=k;};
+
+/* een punt tekenen. label: 'Punt 3' ; pt: {tx,who,ok,ph:[{s,w,h}]} ; o: {photos:true,small:false} */
+function drawPoint(c,label,pt,o){
+  var doc=c.doc,W=doc.w,CW=W-2*M,o2=o||{};
+  var who=String(pt.who||'').trim(),right=(who?'Verantwoordelijke: '+who:'')+(pt.ok?(who?'  ·  ':'')+'Afgewerkt':'');
+  var lines=wrap(pt.tx||'',CW,11,'F1');if(!lines.length&&!(pt.ph||[]).length)lines=['(geen tekst)'];
+  c.need(22+Math.min(lines.length,3)*15);
+  /* kop van het punt */
+  doc.rect(M,c.y,CW,20,pt.ok?'#E6F3EA':'#EEF2F7');
+  doc.text(label,M+8,c.y+14,10,'F2',NAVY);
+  if(right){var rx=W-M-8;
+    if(pt.ok){var t2='Afgewerkt';doc.rtext(t2,rx,c.y+14,9.5,'F2',OK);rx-=tw(t2,9.5,'F2');if(who){doc.rtext('  ·  ',rx,c.y+14,9.5,'F1',GREY);rx-=tw('  ·  ',9.5,'F1');}}
+    if(who){doc.rtext(who,rx,c.y+14,9.5,'F2',INK);rx-=tw(who,9.5,'F2');doc.rtext('Verantwoordelijke: ',rx,c.y+14,9.5,'F1',GREY);}
+  }
+  c.y+=30;
+  lines.forEach(function(s){c.need(15);doc.text(s,M,c.y+8,11,'F1',INK);c.y+=15;});
+  /* foto's */
+  var ph=(o2.photos===false)?[]:(pt.ph||[]).filter(function(p){return p&&p.s&&p.w&&p.h;});
+  if(ph.length){
+    c.y+=6;var cols=ph.length===1?1:2,gap=12,cw=(CW-gap*(cols-1))/cols,maxH=cols===1?300:200;
+    for(var i=0;i<ph.length;i+=cols){
+      var row=ph.slice(i,i+cols),sz=row.map(function(p){var s=Math.min(cw/p.w,maxH/p.h);return [p.w*s,p.h*s];}),rh=Math.max.apply(null,sz.map(function(z){return z[1];}));
+      c.need(rh+gap);
+      row.forEach(function(p,k){var ix=doc.addImg(p),x=M+k*(cw+gap)+(cols===1?0:(cw-sz[k][0])/2);doc.img(ix,x,c.y,sz[k][0],sz[k][1]);});
+      c.y+=rh+gap;
+    }
+    c.y-=gap;
+  }
+  c.y+=16;c.need(4);doc.line(M,c.y-8,W-M,c.y-8,LINE,0.6);
+}
+
+/* verslag: {id,p,pn,a,d,t,by,pts:[...]} ; o.embed: gegevens meesturen voor import */
+function verslagPdf(v,o){
+  o=o||{};var doc=new Doc(),pts=v.pts||[];
+  var whoC={};pts.forEach(function(p){var w=String(p.who||'').trim();if(w)whoC[w]=(whoC[w]||0)+1;});
+  var c=new Ctx(doc,function(cc){doc.text((v.pn||'Werf')+'  ·  '+longD(v.d)+'  (vervolg)',M,cc.y+8,9,'F2',GREY);cc.y+=22;});
+  c.y=header(doc,'WERFVERSLAG',v.pn||'Werf',v.a||'',longD(v.d)+(v.t?'  ·  '+v.t:''),v.by?'Opgemaakt door '+v.by:'');
+  var sum=pts.length+(pts.length===1?' punt':' punten'),ks=Object.keys(whoC);
+  if(ks.length)sum+='  ·  '+ks.map(function(k){return k+' ('+whoC[k]+')';}).join(', ');
+  wrap(sum,doc.w-2*M,10,'F1').forEach(function(s){doc.text(s,M,c.y+8,10,'F1',GREY);c.y+=14;});
+  c.y+=10;
+  if(v.nt){wrap(v.nt,doc.w-2*M,11,'F3').forEach(function(s){c.need(15);doc.text(s,M,c.y+8,11,'F3',INK);c.y+=15;});c.y+=12;}
+  pts.forEach(function(p,i){drawPoint(c,'Punt '+(i+1),p,{});});
+  if(!pts.length){doc.text('Er staan geen punten in dit verslag.',M,c.y+8,11,'F3',GREY);}
+  footer(doc,'Werfverslag '+(v.pn||'')+' – '+shortD(v.d));
+  var data=null;
+  if(o.embed!==false){
+    data={k:'wv1',io:IO,r:{id:v.id,p:v.p||'',pn:v.pn||'',a:v.a||'',d:v.d||'',t:v.t||'',by:v.by||'',nt:v.nt||'',
+      pts:pts.map(function(p){return {id:p.id||'',tx:p.tx||'',who:p.who||'',ok:!!p.ok,ph:(p.ph||[]).filter(function(x){return x&&x.s;}).map(function(x){return doc.addImg(x);})};})}};
+  }
+  return doc.blob(data);
+}
+function verslagName(v){return 'Werfverslag '+String(v.pn||'werf').replace(/[\\\/:*?"<>|]+/g,' ').trim()+' '+fileD(v.d)+'.pdf';}
+
+/* overzicht: {title,sub,right,groups:[{head,sub,items:[{label,pt}]}],photos} */
+function overzichtPdf(o){
+  var doc=new Doc(),c=new Ctx(doc,function(cc){doc.text(o.title+'  (vervolg)',M,cc.y+8,9,'F2',GREY);cc.y+=22;});
+  c.y=header(doc,o.kicker||'OVERZICHT',o.title,o.sub||'',o.right||'',o.right2||'');
+  if(!o.groups.length){doc.text('Geen punten gevonden.',M,c.y+8,11,'F3',GREY);}
+  o.groups.forEach(function(g){
+    c.need(60);
+    doc.text(g.head,M,c.y+12,13,'F2',NAVY);c.y+=18;
+    if(g.sub){doc.text(g.sub,M,c.y+8,9.5,'F1',GREY);c.y+=14;}
+    c.y+=8;
+    g.items.forEach(function(it){drawPoint(c,it.label,it.pt,{photos:o.photos});});
+    c.y+=8;
+  });
+  footer(doc,o.foot||o.title);
+  return doc.blob(null);
+}
+
+/* pdf lezen -> verslag met foto's als dataURL, of null */
+function parse(u8){
+  var s=latin(u8),m=/\/Type \/WerfverslagData \/Length (\d+) >>\r?\nstream\r?\n/.exec(s);
+  if(!m)return null;
+  var data=JSON.parse(b64utf8(s.substr(m.index+m[0].length,+m[1]).replace(/\s/g,'')));
+  if(!data||data.k!=='wv1'||!data.r)return null;
+  var re=/(\d+) 0 obj\r?\n<< \/Type \/XObject \/Subtype \/Image \/Width (\d+) \/Height (\d+) [^>]*?\/Length (\d+) >>\r?\nstream\r?\n/g,im={},x;
+  while((x=re.exec(s))){im[+x[1]]={w:+x[2],h:+x[3],st:x.index+x[0].length,len:+x[4]};}
+  var io=data.io||IO;
+  (data.r.pts||[]).forEach(function(p){p.ph=(p.ph||[]).map(function(i){var q=im[io+i];if(!q)return null;return {s:'data:image/jpeg;base64,'+b64FromLatin(s.substr(q.st,q.len)),w:q.w,h:q.h};}).filter(Boolean);});
+  return data.r;
+}
+
+/* foto verkleinen -> {s,w,h} */
+function shrink(src,max,q){
+  return new Promise(function(res,rej){
+    var url=typeof src==='string'?src:URL.createObjectURL(src),img=new Image();
+    img.onload=function(){
+      var w=img.naturalWidth,h=img.naturalHeight,s=Math.min(1,max/Math.max(w,h));w=Math.max(1,Math.round(w*s));h=Math.max(1,Math.round(h*s));
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;var g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(img,0,0,w,h);
+      if(typeof src!=='string')URL.revokeObjectURL(url);
+      res({s:cv.toDataURL('image/jpeg',q),w:w,h:h});
+    };
+    img.onerror=function(){if(typeof src!=='string')URL.revokeObjectURL(url);rej(new Error('Deze foto kon niet gelezen worden.'));};
+    img.src=url;
+  });
+}
+
+return {Doc:Doc,verslagPdf:verslagPdf,verslagName:verslagName,overzichtPdf:overzichtPdf,parse:parse,shrink:shrink,longD:longD,shortD:shortD,fileD:fileD,utf8b64:utf8b64,b64utf8:b64utf8};
+})();
+
+(function(){
+'use strict';
+var app=document.getElementById('app');
+var LK='wv:lijst',OK='wv:eigen',NK='wv:naam',RK='wv:namen';
+var IC={
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="4"/></svg>',
+  img:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
+  dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>'
+};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pad(n){return (n<10?'0':'')+n;}
+function nowD(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function nowT(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
+function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function norm(s){return String(s||'').trim().toLowerCase().replace(/\s+/g,' ');}
+
+/* ---------- opslag (IndexedDB: verslagen + foto's apart) ---------- */
+var dbp=null;
+function db(){if(dbp)return dbp;dbp=new Promise(function(res,rej){var r=indexedDB.open('werfverslagen',1);r.onupgradeneeded=function(){r.result.createObjectStore('v',{keyPath:'id'});r.result.createObjectStore('f');};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});return dbp;}
+function tx(store,mode,fn){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction(store,mode),s=t.objectStore(store),out=fn(s);t.oncomplete=function(){res(out&&out.result!==undefined?out.result:out);};t.onerror=function(){rej(t.error);};t.onabort=function(){rej(t.error);};});});}
+function allV(){return tx('v','readonly',function(s){return s.getAll();});}
+function putV(v){return tx('v','readwrite',function(s){s.put(v);});}
+function delV(id){return tx('v','readwrite',function(s){s.delete(id);});}
+function getF(id){return tx('f','readonly',function(s){return s.get(id);});}
+function putF(id,x){return tx('f','readwrite',function(s){s.put(x,id);});}
+function delF(id){return tx('f','readwrite',function(s){s.delete(id);});}
+
+/* ---------- werflijst uit de planningstool ---------- */
+var L=lsGet(LK,null),own=lsGet(OK,[]),msg=null;
+try{
+  var raw=(location.hash||'').replace(/^#/,''),mm=/(?:^|&)w=([^&]+)/.exec(raw);
+  if(mm){var x=JSON.parse(WV.b64utf8(decodeURIComponent(mm[1]).replace(/-/g,'+').replace(/_/g,'/')));
+    if(x&&x.w){L=x;lsSet(LK,L);
+      var names={};(L.w||[]).forEach(function(w){names[norm(w[1])]=1;});
+      own=own.filter(function(o){return !names[norm(o.pn)];});lsSet(OK,own);
+      msg='Werflijst bijgewerkt: '+L.w.length+' werven uit de planning.';}
+    history.replaceState(null,'',location.pathname+location.search);}
+}catch(e){msg='De link kon niet gelezen worden. Vraag een nieuwe link uit de planningstool.';}
+
+function werven(){return (L&&L.w)||[];}
+function allNames(){
+  var seen={},out=[];
+  function add(n){n=String(n||'').trim();if(!n||seen[norm(n)])return;seen[norm(n)]=1;out.push(n);}
+  lsGet(RK,[]).forEach(add);((L&&L.n)||[]).forEach(add);
+  return out;
+}
+function useName(n){n=String(n||'').trim();if(!n)return;var a=lsGet(RK,[]).filter(function(x){return norm(x)!==norm(n);});a.unshift(n);lsSet(RK,a.slice(0,30));}
+
+/* ---------- toestand ---------- */
+var V=[],cur=null,F={},ui={v:'home',q:'',nw:null,del:null,delV:false,pdf:null,busy:'',toast:''},saveT=null;
+function byIdV(id){for(var i=0;i<V.length;i++)if(V[i].id===id)return V[i];return null;}
+function nPh(v){var n=0;(v.pts||[]).forEach(function(p){n+=(p.ph||[]).length;});return n;}
+function save(){if(!cur)return;cur.upd=Date.now();clearTimeout(saveT);var v=cur;saveT=setTimeout(function(){putV(v).catch(function(){toast('Bewaren op de gsm lukte niet. Is het geheugen vol?');});},300);}
+function toast(t){ui.toast=t;render();clearTimeout(toast.t);toast.t=setTimeout(function(){ui.toast='';render();},3500);}
+function busy(t){ui.busy=t;render();}
+
+function newV(w){
+  var v={id:uid('v'),p:w.p||'',pn:w.pn,a:w.a||'',d:nowD(),t:nowT(),by:lsGet(NK,''),pts:[{id:uid('k'),tx:'',who:'',ph:[]}],upd:Date.now(),sent:null};
+  V.unshift(v);cur=v;putV(v);ui.v='edit';render();
+  setTimeout(function(){var t=document.querySelector('textarea[data-f="tx"]');if(t)t.focus();},60);
+}
+function openV(id){
+  var v=byIdV(id);if(!v)return;cur=v;ui.v='edit';ui.del=null;ui.delV=false;
+  var need=[];(v.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){if(!F[f])need.push(f);});});
+  Promise.all(need.map(function(f){return getF(f).then(function(x){if(x)F[f]=x;});})).then(render,render);
+  render();window.scrollTo(0,0);
+}
+
+/* ---------- foto's ---------- */
+function addPhotos(pi,files){
+  if(!cur||!files||!files.length)return;var p=cur.pts[pi];if(!p)return;
+  var list=Array.prototype.slice.call(files),done=0,bad=0;
+  busy(list.length>1?'Foto\'s verwerken… 0/'+list.length:'Foto verwerken…');
+  (function next(){
+    if(!list.length){ui.busy='';save();render();if(bad)toast(bad===1?'Eén foto kon niet gelezen worden.':bad+' foto\'s konden niet gelezen worden.');return;}
+    var f=list.shift();
+    WV.shrink(f,1600,0.72).then(function(x){var id=uid('f');F[id]=x;p.ph.push(id);return putF(id,x);}).catch(function(){bad++;}).then(function(){done++;if(ui.busy)ui.busy='Foto\'s verwerken… '+done+'/'+(done+list.length);render();next();});
+  })();
+}
+
+/* ---------- pdf ---------- */
+function fullV(v){
+  return {id:v.id,p:v.p,pn:v.pn,a:v.a,d:v.d,t:v.t,by:v.by,
+    pts:(v.pts||[]).filter(function(p){return String(p.tx||'').trim()||(p.ph||[]).length;}).map(function(p){return {id:p.id,tx:p.tx,who:p.who,ok:false,ph:(p.ph||[]).map(function(f){return F[f];}).filter(Boolean)};})};
+}
+function makePdf(){
+  var v=cur;if(!v)return;
+  var miss=[];(v.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){if(!F[f])miss.push(f);});});
+  busy('PDF maken…');
+  Promise.all(miss.map(function(f){return getF(f).then(function(x){if(x)F[f]=x;});})).then(function(){
+    var fv=fullV(v);if(!fv.pts.length){ui.busy='';toast('Schrijf eerst minstens één punt.');return;}
+    (v.pts||[]).forEach(function(p){useName(p.who);});if(v.by)lsSet(NK,v.by);
+    var blob=WV.verslagPdf(fv,{embed:true}),name=WV.verslagName(fv);
+    ui.pdf={blob:blob,name:name,file:new File([blob],name,{type:'application/pdf'}),kb:Math.round(blob.size/1024)};
+    ui.busy='';ui.v='done';render();window.scrollTo(0,0);
+  }).catch(function(e){ui.busy='';toast('De pdf kon niet gemaakt worden'+(e&&e.message?': '+e.message:'')+'.');});
+}
+function sharePdf(){
+  var p=ui.pdf;if(!p)return;
+  if(navigator.canShare&&navigator.canShare({files:[p.file]})){
+    navigator.share({files:[p.file],title:p.name}).then(function(){cur.sent=Date.now();save();toast('Gedeeld.');}).catch(function(e){if(e&&e.name==='AbortError')return;dlPdf();});
+  }else dlPdf();
+}
+function dlPdf(){
+  var p=ui.pdf;if(!p)return;var a=document.createElement('a');a.href=URL.createObjectURL(p.blob);a.download=p.name;document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},1500);
+  if(cur){cur.sent=cur.sent||Date.now();save();}
+  toast('De pdf staat bij Downloads. Je kan hem van daar delen via WhatsApp.');
+}
+
+/* ---------- schermen ---------- */
+function top(kick,title,sub,back){
+  return '<header class="top">'+(back?'<button class="back" data-a="'+back+'" aria-label="Terug">←</button>':'')+'<div class="t"><small>'+esc(kick)+'</small><h1>'+esc(title)+'</h1>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div></header>';
+}
+function homeHTML(){
+  var h=top('Werfverslagen','Werfverslag',''),list=V.slice().sort(function(a,b){return (b.d+b.t)<(a.d+a.t)?-1:(b.d+b.t)>(a.d+a.t)?1:0;});
+  h+='<div class="wrap">';
+  if(msg)h+='<div class="okmsg">'+esc(msg)+'</div>';
+  h+='<button class="btn pri full" data-a="new" style="min-height:56px;font-size:17px">+ Nieuw werfverslag</button>';
+  if(!list.length)h+='<div class="card empty">Nog geen verslagen op deze gsm.</div>';
+  else{h+='<div class="grp">Op deze gsm</div><div class="list">';
+    list.forEach(function(v){var n=(v.pts||[]).filter(function(p){return String(p.tx||'').trim()||(p.ph||[]).length;}).length,f=nPh(v);
+      h+='<button class="item" data-a="open" data-id="'+v.id+'"><span class="m"><b>'+esc(v.pn)+'</b><span class="s">'+esc(WV.shortD(v.d))+' · '+esc(v.t)+' · '+n+(n===1?' punt':' punten')+(f?' · '+f+(f===1?' foto':' foto\'s'):'')+'</span></span>'+(v.sent?'<span class="tg ok">Verstuurd</span>':'<span class="tg">Concept</span>')+'</button>';});
+    h+='</div>';}
+  h+='<div class="card" style="margin-top:8px"><h2>Instellingen</h2><label class="lab" for="f-naam">Jouw naam (komt op het verslag)</label><input class="in" id="f-naam" data-g="naam" value="'+esc(lsGet(NK,''))+'" autocomplete="name">'+
+    '<p class="hint" style="margin-top:12px">'+(L?'Werflijst: '+werven().length+' werven uit de planning'+(L.at?', van '+esc(WV.shortD(L.at)):'')+'. ':'Nog geen werflijst. ')+'Open de link uit de planningstool opnieuw om de lijst bij te werken.</p>'+
+    '<p class="hint" style="margin-top:8px">Tip: zet deze pagina op je startscherm via het menu ⋮ → Toevoegen aan startscherm.</p></div>';
+  return h+'</div>';
+}
+function pickHTML(){
+  var q=norm(ui.q),back=cur&&ui.pickFor==='edit'?'edit':'home',h=top('Werfverslag','Kies de werf','',back)+'<div class="wrap">';
+  if(ui.nw){
+    h+='<div class="card"><h2>Nieuwe werf</h2><label class="lab" for="n-pn">Naam van de werf</label><input class="in" id="n-pn" data-n="pn" value="'+esc(ui.nw.pn)+'" placeholder="bijvoorbeeld Peeters - Aalst">'+
+      '<label class="lab" for="n-a" style="margin-top:12px">Adres (mag leeg)</label><input class="in" id="n-a" data-n="a" value="'+esc(ui.nw.a)+'">'+
+      '<p class="hint" style="margin-top:10px">Deze werf komt in de planningstool zodra je het verslag daar inleest.</p>'+
+      (ui.nw.err?'<div class="warn" style="margin-top:10px">'+esc(ui.nw.err)+'</div>':'')+
+      '<div class="row" style="margin-top:14px"><button class="btn" data-a="nw-cancel">Annuleren</button><button class="btn pri" data-a="nw-ok">Werf kiezen</button></div></div>';
+    return h+'</div>';
+  }
+  h+='<input class="in" id="f-q" data-g="q" type="search" placeholder="Zoek een werf" value="'+esc(ui.q)+'" autocomplete="off">';
+  function itm(w,tag){return '<button class="item" data-a="pick" data-p="'+esc(w.p)+'" data-pn="'+esc(w.pn)+'" data-ad="'+esc(w.a||'')+'"><span class="m"><b>'+esc(w.pn)+'</b>'+(w.a?'<span class="s">'+esc(w.a)+'</span>':'')+'</span>'+(tag||'')+'</button>';}
+  var ws=werven().map(function(w){return {p:w[0],pn:w[1],a:w[2]||'',act:!!w[3]};}).filter(function(w){return !q||norm(w.pn+' '+w.a).indexOf(q)>=0;});
+  var ow=own.filter(function(w){return !q||norm(w.pn+' '+w.a).indexOf(q)>=0;});
+  var act=ws.filter(function(w){return w.act;}),rest=ws.filter(function(w){return !w.act;});
+  if(act.length)h+='<div class="grp">Nu in de planning</div><div class="list">'+act.map(function(w){return itm(w);}).join('')+'</div>';
+  if(ow.length)h+='<div class="grp">Zelf toegevoegd</div><div class="list">'+ow.map(function(w){return itm(w,'<span class="tg new">Nieuw</span>');}).join('')+'</div>';
+  if(rest.length)h+='<div class="grp">'+(act.length?'Andere werven':'Werven')+'</div><div class="list">'+rest.map(function(w){return itm(w);}).join('')+'</div>';
+  if(!act.length&&!ow.length&&!rest.length)h+='<div class="card empty">'+(q?'Geen werf gevonden met "'+esc(ui.q)+'".':(L?'Geen werven in de lijst.':'Nog geen werflijst op deze gsm. Open de link uit de planningstool, of voeg hieronder zelf een werf toe.'))+'</div>';
+  h+='<button class="btn dash" data-a="nw">+ Nieuwe werf</button>';
+  return h+'</div>';
+}
+function editHTML(){
+  var v=cur,h=top('Werfverslag',v.pn,WV.shortD(v.d)+' · '+v.t,'home')+'<div class="wrap">';
+  var names=allNames();
+  h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div style="min-width:0"><span class="lab">Werf</span><b style="font-size:17px">'+esc(v.pn)+'</b>'+(v.a?'<div class="hint">'+esc(v.a)+'</div>':'')+(!v.p?'<div style="margin-top:4px"><span class="tg new">Nieuwe werf</span></div>':'')+'</div><button class="btn sm" data-a="chg">Wijzigen</button></div>'+
+    '<div class="row" style="margin-top:14px"><div><label class="lab" for="f-d">Datum</label><input class="in" id="f-d" type="date" data-v="d" value="'+esc(v.d)+'"></div><div><label class="lab" for="f-t">Uur</label><input class="in" id="f-t" type="time" data-v="t" value="'+esc(v.t)+'"></div></div>'+
+    '<label class="lab" for="f-by" style="margin-top:12px">Opgemaakt door</label><input class="in" id="f-by" data-v="by" value="'+esc(v.by||'')+'"></div>';
+  h+='<datalist id="dl-names">'+names.map(function(n){return '<option value="'+esc(n)+'">';}).join('')+'</datalist>';
+  v.pts.forEach(function(p,i){
+    var quick=names.slice(0,8);if(p.who&&!quick.some(function(n){return norm(n)===norm(p.who);}))quick=[p.who].concat(quick.slice(0,7));
+    h+='<section class="card pt"><div class="hd"><b>Punt '+(i+1)+'</b>'+(ui.del===p.id?'<span style="display:flex;gap:6px"><button class="btn sm" data-a="del-no">Niet</button><button class="btn sm dng" data-a="del-yes" data-i="'+i+'">Verwijderen</button></span>':'<button class="btn sm dng" data-a="del" data-id="'+p.id+'" aria-label="Punt '+(i+1)+' verwijderen">Verwijderen</button>')+'</div>'+
+      '<div><label class="sr" for="tx-'+i+'">Tekst van punt '+(i+1)+'</label><textarea class="in" id="tx-'+i+'" data-f="tx" data-i="'+i+'" placeholder="Wat is er vastgesteld, wat moet er gebeuren?">'+esc(p.tx)+'</textarea></div>'+
+      '<div><label class="lab" for="who-'+i+'">Verantwoordelijke</label><input class="in" id="who-'+i+'" data-f="who" data-i="'+i+'" list="dl-names" value="'+esc(p.who)+'" placeholder="Naam (mag leeg)" autocomplete="off">'+
+      (quick.length?'<div class="chips">'+quick.map(function(n){return '<button class="chip'+(norm(n)===norm(p.who)?' on':'')+'" data-a="who" data-i="'+i+'" data-n="'+esc(n)+'">'+esc(n)+'</button>';}).join('')+'</div>':'')+'</div>'+
+      ((p.ph||[]).length?'<div class="ph">'+p.ph.map(function(f,k){var x=F[f];return '<div>'+(x?'<img src="'+x.s+'" alt="Foto '+(k+1)+' bij punt '+(i+1)+'">':'')+'<button data-a="rmf" data-i="'+i+'" data-k="'+k+'" aria-label="Foto verwijderen">×</button></div>';}).join('')+'</div>':'')+
+      '<div class="pbtn"><label class="btn sm">'+IC.cam+'Foto nemen<input type="file" accept="image/*" capture="environment" data-ph="'+i+'"></label><label class="btn sm">'+IC.img+'Uit galerij<input type="file" accept="image/*" multiple data-ph="'+i+'"></label></div>'+
+    '</section>';
+  });
+  h+='<button class="btn dash" data-a="addpt">+ Punt toevoegen</button>';
+  h+='<div style="margin-top:20px;text-align:center">'+(ui.delV?'<p class="hint" style="margin-bottom:8px">Dit verslag en de foto\'s worden van deze gsm gewist.</p><div class="row"><button class="btn" data-a="delv-no">Niet wissen</button><button class="btn dng" data-a="delv-yes">Ja, wissen</button></div>':'<button class="btn dng sm" data-a="delv">Verslag wissen van deze gsm</button>')+'</div>';
+  h+='</div><div class="bar"><div class="in2"><button class="btn wa" data-a="pdf">Klaar · PDF maken</button></div></div>';
+  return h;
+}
+function doneHTML(){
+  var p=ui.pdf,v=cur,h=top('Werfverslag','PDF is klaar',v.pn+' · '+WV.shortD(v.d),'edit')+'<div class="wrap">';
+  h+='<div class="card"><h2>'+esc(p.name)+'</h2><p class="hint">'+p.kb+' kB · deel hem via WhatsApp met wie het moet lezen. Stuur hem ook naar jezelf (of naar de bureau-gsm) om hem in de planningstool in te lezen.</p>'+
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px"><button class="btn wa full" data-a="share" style="min-height:56px;font-size:17px">'+IC.share+'Delen via WhatsApp</button><button class="btn full" data-a="dl">'+IC.dl+'Opslaan op de gsm</button></div></div>'+
+    '<button class="btn full" data-a="edit">Terug naar het verslag</button><button class="btn full" data-a="home">Naar alle verslagen</button>';
+  return h+'</div>';
+}
+function render(){
+  var ae=document.activeElement,aid=ae&&ae.id,ss=null;if(ae&&ae.selectionStart!=null){try{ss=[ae.selectionStart,ae.selectionEnd];}catch(e){}}
+  var sy=window.pageYOffset,h;
+  if(ui.v==='edit'&&cur)h=editHTML();else if(ui.v==='pick')h=pickHTML();else if(ui.v==='done'&&ui.pdf&&cur)h=doneHTML();else{ui.v='home';h=homeHTML();}
+  if(ui.toast)h+='<div class="toast" role="status">'+esc(ui.toast)+'</div>';
+  if(ui.busy)h+='<div class="busy" role="status">'+esc(ui.busy)+'</div>';
+  app.innerHTML=h;window.scrollTo(0,sy);
+  if(aid){var e2=document.getElementById(aid);if(e2){try{e2.focus();if(ss&&e2.setSelectionRange)e2.setSelectionRange(ss[0],ss[1]);}catch(x){}}}
+  grow();
+}
+function grow(){Array.prototype.forEach.call(document.querySelectorAll('textarea'),function(t){t.style.height='auto';t.style.height=Math.max(96,t.scrollHeight+2)+'px';});}
+
+/* ---------- invoer ---------- */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-a]');if(!el)return;var a=el.dataset.a,i=+el.dataset.i;
+  switch(a){
+    case 'new':ui.pickFor='new';ui.q='';ui.nw=null;ui.v='pick';msg=null;render();window.scrollTo(0,0);break;
+    case 'chg':ui.pickFor='edit';ui.q='';ui.nw=null;ui.v='pick';render();window.scrollTo(0,0);break;
+    case 'pick':var w={p:el.dataset.p,pn:el.dataset.pn,a:el.dataset.ad};
+      if(ui.pickFor==='edit'&&cur){cur.p=w.p;cur.pn=w.pn;cur.a=w.a;save();ui.v='edit';render();}else newV(w);break;
+    case 'nw':ui.nw={pn:ui.q||'',a:'',err:''};render();var ni=document.getElementById('n-pn');if(ni)ni.focus();break;
+    case 'nw-cancel':ui.nw=null;render();break;
+    case 'nw-ok':var pn=String(ui.nw.pn||'').trim();if(!pn){ui.nw.err='Geef de werf een naam.';render();break;}
+      var ex=werven().filter(function(x){return norm(x[1])===norm(pn);})[0],w2=ex?{p:ex[0],pn:ex[1],a:ex[2]||''}:{p:'',pn:pn,a:String(ui.nw.a||'').trim()};
+      if(!ex&&!own.some(function(o){return norm(o.pn)===norm(pn);})){own.unshift({p:'',pn:w2.pn,a:w2.a});lsSet(OK,own);}
+      ui.nw=null;if(ui.pickFor==='edit'&&cur){cur.p=w2.p;cur.pn=w2.pn;cur.a=w2.a;save();ui.v='edit';render();}else newV(w2);break;
+    case 'home':ui.v='home';ui.pdf=null;cur=null;render();window.scrollTo(0,0);break;
+    case 'edit':ui.v='edit';render();break;
+    case 'open':openV(el.dataset.id);break;
+    case 'addpt':cur.pts.push({id:uid('k'),tx:'',who:'',ph:[]});save();render();var ts=document.querySelectorAll('textarea[data-f="tx"]');if(ts.length){ts[ts.length-1].focus();ts[ts.length-1].scrollIntoView({block:'center'});}break;
+    case 'del':ui.del=el.dataset.id;render();break;
+    case 'del-no':ui.del=null;render();break;
+    case 'del-yes':var dp=cur.pts.splice(i,1)[0];(dp&&dp.ph||[]).forEach(function(f){delF(f).catch(function(){});delete F[f];});if(!cur.pts.length)cur.pts.push({id:uid('k'),tx:'',who:'',ph:[]});ui.del=null;save();render();break;
+    case 'who':var pp=cur.pts[i];if(pp){pp.who=norm(pp.who)===norm(el.dataset.n)?'':el.dataset.n;save();render();}break;
+    case 'rmf':var pf=cur.pts[i],k=+el.dataset.k;if(pf){var fid=pf.ph.splice(k,1)[0];delF(fid).catch(function(){});delete F[fid];save();render();}break;
+    case 'delv':ui.delV=true;render();break;
+    case 'delv-no':ui.delV=false;render();break;
+    case 'delv-yes':var dv=cur;(dv.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){delF(f).catch(function(){});delete F[f];});});
+      delV(dv.id).catch(function(){});V=V.filter(function(x){return x.id!==dv.id;});cur=null;ui.delV=false;ui.v='home';render();toast('Verslag gewist.');break;
+    case 'pdf':makePdf();break;
+    case 'share':sharePdf();break;
+    case 'dl':dlPdf();break;
+  }
+});
+document.addEventListener('input',function(e){
+  var el=e.target,d=el.dataset||{};
+  if(d.g==='q'){ui.q=el.value;render();return;}
+  if(d.g==='naam'){lsSet(NK,el.value.trim());return;}
+  if(d.n!==undefined&&ui.nw){ui.nw[d.n]=el.value;return;}
+  if(!cur)return;
+  if(d.v){cur[d.v]=el.value;save();return;}
+  if(d.f){var p=cur.pts[+d.i];if(!p)return;p[d.f]=el.value;save();if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=Math.max(96,el.scrollHeight+2)+'px';}
+    if(d.f==='who'){var cs=el.parentNode.querySelectorAll('.chip');Array.prototype.forEach.call(cs,function(c){c.classList.toggle('on',norm(c.dataset.n)===norm(el.value));});}}
+});
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.dataset&&el.dataset.ph!==undefined){addPhotos(+el.dataset.ph,el.files);el.value='';return;}
+  if(cur&&el.dataset&&(el.dataset.v==='d'||el.dataset.v==='t'))render();
+  if(cur&&el.dataset&&el.dataset.f==='who')useName(el.value);
+});
+
+/* ---------- start ---------- */
+render();
+allV().then(function(a){V=a||[];render();}).catch(function(){toast('Deze browser laat niet toe om verslagen te bewaren.');});
+if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
+})();
+</script>
+</body>
+</html>
