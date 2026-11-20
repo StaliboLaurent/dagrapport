@@ -442,6 +442,7 @@ function homeHTML(){
       h+='<button class="item" data-a="open" data-id="'+v.id+'"><span class="m"><b>'+esc(v.pn)+'</b><span class="s">'+esc(WV.shortD(v.d))+' · '+esc(v.t)+' · '+n+(n===1?' punt':' punten')+(f?' · '+f+(f===1?' foto':' foto\'s'):'')+'</span></span>'+(v.sent?'<span class="tg ok">Verstuurd</span>':'<span class="tg">Concept</span>')+'</button>';});
     h+='</div>';}
   h+='<div class="card" style="margin-top:8px"><h2>Instellingen</h2><label class="lab" for="f-naam">Jouw naam (komt op het verslag)</label><input class="in" id="f-naam" data-g="naam" value="'+esc(lsGet(NK,''))+'" autocomplete="name">'+
+    '<p class="hint" style="margin-top:12px;font-size:11px">Werfverslag vs 1.1 · huisstijl</p>'+
     '<p class="hint" style="margin-top:12px">'+(L?'Werflijst: '+werven().length+' werven uit de planning'+(L.at?', van '+esc(WV.shortD(L.at)):'')+'. ':'Nog geen werflijst. ')+'Laad <b>planning.json</b> opnieuw als er werven bijgekomen zijn. Op Android kies je in het venster OneDrive (via ☰ of Bladeren).</p>'+
     (L?'<div style="margin-top:10px">'+jsonBtn('Werven opnieuw laden uit planning.json')+'</div>':'')+
     '<p class="hint" style="margin-top:8px">Tip: zet deze pagina op je startscherm via het menu ⋮ → Toevoegen aan startscherm.</p></div>';
