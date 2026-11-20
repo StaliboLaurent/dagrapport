@@ -211,13 +211,14 @@ function verslagPdf(v,o){
   if(ks.length)sum+='  ·  '+ks.map(function(k){return k+' ('+whoC[k]+')';}).join(', ');
   wrap(sum,doc.w-2*M,10,'F1').forEach(function(s){doc.text(s,M,c.y+8,10,'F1',GREY);c.y+=14;});
   c.y+=10;
-  if(v.nt){wrap(v.nt,doc.w-2*M,11,'F3').forEach(function(s){c.need(15);doc.text(s,M,c.y+8,11,'F3',INK);c.y+=15;});c.y+=12;}
+  var ov=(v.ph||[]).filter(function(x){return x&&x.s;});
+  if(String(v.nt||'').trim()||ov.length){drawPoint(c,'Totaalbeeld van de werf',{tx:v.nt||'',ph:ov},{});c.y+=6;}
   pts.forEach(function(p,i){drawPoint(c,'Punt '+(i+1),p,{});});
-  if(!pts.length){doc.text('Er staan geen punten in dit verslag.',M,c.y+8,11,'F3',GREY);}
+  if(!pts.length&&!String(v.nt||'').trim()&&!ov.length){doc.text('Er staan geen punten in dit verslag.',M,c.y+8,11,'F3',GREY);}
   footer(doc,'Werfverslag '+(v.pn||'')+' – '+shortD(v.d));
   var data=null;
   if(o.embed!==false){
-    data={k:'wv1',io:IO,r:{id:v.id,p:v.p||'',pn:v.pn||'',a:v.a||'',d:v.d||'',t:v.t||'',by:v.by||'',nt:v.nt||'',
+    data={k:'wv1',io:IO,r:{id:v.id,p:v.p||'',pn:v.pn||'',a:v.a||'',d:v.d||'',t:v.t||'',by:v.by||'',nt:v.nt||'',ph:ov.map(function(x){return doc.addImg(x);}),
       pts:pts.map(function(p){return {id:p.id||'',tx:p.tx||'',who:p.who||'',ok:!!p.ok,ph:(p.ph||[]).filter(function(x){return x&&x.s;}).map(function(x){return doc.addImg(x);})};})}};
   }
   return doc.blob(data);
@@ -250,6 +251,8 @@ function parse(u8){
   var re=/(\d+) 0 obj\r?\n<< \/Type \/XObject \/Subtype \/Image \/Width (\d+) \/Height (\d+) [^>]*?\/Length (\d+) >>\r?\nstream\r?\n/g,im={},x;
   while((x=re.exec(s))){im[+x[1]]={w:+x[2],h:+x[3],st:x.index+x[0].length,len:+x[4]};}
   var io=data.io||IO;
+  function mapPh(a){return (a||[]).map(function(i){var q=im[io+i];if(!q)return null;return {s:'data:image/jpeg;base64,'+b64FromLatin(s.substr(q.st,q.len)),w:q.w,h:q.h};}).filter(Boolean);}
+  data.r.ph=mapPh(data.r.ph);
   (data.r.pts||[]).forEach(function(p){p.ph=(p.ph||[]).map(function(i){var q=im[io+i];if(!q)return null;return {s:'data:image/jpeg;base64,'+b64FromLatin(s.substr(q.st,q.len)),w:q.w,h:q.h};}).filter(Boolean);});
   return data.r;
 }
@@ -350,26 +353,28 @@ function useName(n){n=String(n||'').trim();if(!n)return;var a=lsGet(RK,[]).filte
 /* ---------- toestand ---------- */
 var V=[],cur=null,F={},ui={v:'home',q:'',nw:null,del:null,delV:false,pdf:null,busy:'',toast:''},saveT=null;
 function byIdV(id){for(var i=0;i<V.length;i++)if(V[i].id===id)return V[i];return null;}
-function nPh(v){var n=0;(v.pts||[]).forEach(function(p){n+=(p.ph||[]).length;});return n;}
+function allPh(v){var a=(v.ph||[]).slice();(v.pts||[]).forEach(function(p){a=a.concat(p.ph||[]);});return a;}
+function nPh(v){return allPh(v).length;}
+function tgt(k){if(!cur)return null;if(k==='ov'){cur.ph=cur.ph||[];return cur;}return cur.pts[+k]||null;}
 function save(){if(!cur)return;cur.upd=Date.now();clearTimeout(saveT);var v=cur;saveT=setTimeout(function(){putV(v).catch(function(){toast('Bewaren op de gsm lukte niet. Is het geheugen vol?');});},300);}
 function toast(t){ui.toast=t;render();clearTimeout(toast.t);toast.t=setTimeout(function(){ui.toast='';render();},3500);}
 function busy(t){ui.busy=t;render();}
 
 function newV(w){
-  var v={id:uid('v'),p:w.p||'',pn:w.pn,a:w.a||'',d:nowD(),t:nowT(),by:lsGet(NK,''),pts:[{id:uid('k'),tx:'',who:'',ph:[]}],upd:Date.now(),sent:null};
+  var v={id:uid('v'),p:w.p||'',pn:w.pn,a:w.a||'',d:nowD(),t:nowT(),by:lsGet(NK,''),nt:'',ph:[],pts:[{id:uid('k'),tx:'',who:'',ph:[]}],upd:Date.now(),sent:null};
   V.unshift(v);cur=v;putV(v);ui.v='edit';render();
   setTimeout(function(){var t=document.querySelector('textarea[data-f="tx"]');if(t)t.focus();},60);
 }
 function openV(id){
   var v=byIdV(id);if(!v)return;cur=v;ui.v='edit';ui.del=null;ui.delV=false;
-  var need=[];(v.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){if(!F[f])need.push(f);});});
+  var need=allPh(v).filter(function(f){return !F[f];});
   Promise.all(need.map(function(f){return getF(f).then(function(x){if(x)F[f]=x;});})).then(render,render);
   render();window.scrollTo(0,0);
 }
 
 /* ---------- foto's ---------- */
 function addPhotos(pi,files){
-  if(!cur||!files||!files.length)return;var p=cur.pts[pi];if(!p)return;
+  if(!cur||!files||!files.length)return;var p=tgt(pi);if(!p)return;
   var list=Array.prototype.slice.call(files),done=0,bad=0;
   busy(list.length>1?'Foto\'s verwerken… 0/'+list.length:'Foto verwerken…');
   (function next(){
@@ -381,15 +386,15 @@ function addPhotos(pi,files){
 
 /* ---------- pdf ---------- */
 function fullV(v){
-  return {id:v.id,p:v.p,pn:v.pn,a:v.a,d:v.d,t:v.t,by:v.by,
+  return {id:v.id,p:v.p,pn:v.pn,a:v.a,d:v.d,t:v.t,by:v.by,nt:v.nt||'',ph:(v.ph||[]).map(function(f){return F[f];}).filter(Boolean),
     pts:(v.pts||[]).filter(function(p){return String(p.tx||'').trim()||(p.ph||[]).length;}).map(function(p){return {id:p.id,tx:p.tx,who:p.who,ok:false,ph:(p.ph||[]).map(function(f){return F[f];}).filter(Boolean)};})};
 }
 function makePdf(){
   var v=cur;if(!v)return;
-  var miss=[];(v.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){if(!F[f])miss.push(f);});});
+  var miss=allPh(v).filter(function(f){return !F[f];});
   busy('PDF maken…');
   Promise.all(miss.map(function(f){return getF(f).then(function(x){if(x)F[f]=x;});})).then(function(){
-    var fv=fullV(v);if(!fv.pts.length){ui.busy='';toast('Schrijf eerst minstens één punt.');return;}
+    var fv=fullV(v);if(!fv.pts.length&&!String(fv.nt||'').trim()&&!fv.ph.length){ui.busy='';toast('Schrijf eerst een totaalbeeld of minstens één punt.');return;}
     (v.pts||[]).forEach(function(p){useName(p.who);});if(v.by)lsSet(NK,v.by);
     var blob=WV.verslagPdf(fv,{embed:true}),name=WV.verslagName(fv);
     ui.pdf={blob:blob,name:name,file:new File([blob],name,{type:'application/pdf'}),kb:Math.round(blob.size/1024)};
@@ -458,6 +463,11 @@ function editHTML(){
   h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div style="min-width:0"><span class="lab">Werf</span><b style="font-size:17px">'+esc(v.pn)+'</b>'+(v.a?'<div class="hint">'+esc(v.a)+'</div>':'')+(!v.p?'<div style="margin-top:4px"><span class="tg new">Nieuwe werf</span></div>':'')+'</div><button class="btn sm" data-a="chg">Wijzigen</button></div>'+
     '<div class="row" style="margin-top:14px"><div><label class="lab" for="f-d">Datum</label><input class="in" id="f-d" type="date" data-v="d" value="'+esc(v.d)+'"></div><div><label class="lab" for="f-t">Uur</label><input class="in" id="f-t" type="time" data-v="t" value="'+esc(v.t)+'"></div></div>'+
     '<label class="lab" for="f-by" style="margin-top:12px">Opgemaakt door</label><input class="in" id="f-by" data-v="by" value="'+esc(v.by||'')+'"></div>';
+  v.ph=v.ph||[];
+  h+='<section class="card pt"><div class="hd"><b>Totaalbeeld van de werf</b></div>'+
+    '<div><label class="sr" for="f-nt">Beschrijving van de werf</label><textarea class="in" id="f-nt" data-v="nt" placeholder="Hoe staat de werf er algemeen bij? Stand van de werken, weer, orde en netheid…">'+esc(v.nt||'')+'</textarea></div>'+
+    (v.ph.length?'<div class="ph">'+v.ph.map(function(f,k){var x=F[f];return '<div>'+(x?'<img src="'+x.s+'" alt="Totaalbeeld foto '+(k+1)+'">':'')+'<button data-a="rmf" data-i="ov" data-k="'+k+'" aria-label="Foto verwijderen">×</button></div>';}).join('')+'</div>':'')+
+    '<div class="pbtn"><label class="btn sm">'+IC.cam+'Foto nemen<input type="file" accept="image/*" capture="environment" data-ph="ov"></label><label class="btn sm">'+IC.img+'Uit galerij<input type="file" accept="image/*" multiple data-ph="ov"></label></div></section>';
   h+='<datalist id="dl-names">'+names.map(function(n){return '<option value="'+esc(n)+'">';}).join('')+'</datalist>';
   v.pts.forEach(function(p,i){
     var quick=names.slice(0,8);if(p.who&&!quick.some(function(n){return norm(n)===norm(p.who);}))quick=[p.who].concat(quick.slice(0,7));
@@ -515,10 +525,10 @@ document.addEventListener('click',function(e){
     case 'del-no':ui.del=null;render();break;
     case 'del-yes':var dp=cur.pts.splice(i,1)[0];(dp&&dp.ph||[]).forEach(function(f){delF(f).catch(function(){});delete F[f];});if(!cur.pts.length)cur.pts.push({id:uid('k'),tx:'',who:'',ph:[]});ui.del=null;save();render();break;
     case 'who':var pp=cur.pts[i];if(pp){pp.who=norm(pp.who)===norm(el.dataset.n)?'':el.dataset.n;save();render();}break;
-    case 'rmf':var pf=cur.pts[i],k=+el.dataset.k;if(pf){var fid=pf.ph.splice(k,1)[0];delF(fid).catch(function(){});delete F[fid];save();render();}break;
+    case 'rmf':var pf=tgt(el.dataset.i),k=+el.dataset.k;if(pf){var fid=pf.ph.splice(k,1)[0];delF(fid).catch(function(){});delete F[fid];save();render();}break;
     case 'delv':ui.delV=true;render();break;
     case 'delv-no':ui.delV=false;render();break;
-    case 'delv-yes':var dv=cur;(dv.pts||[]).forEach(function(p){(p.ph||[]).forEach(function(f){delF(f).catch(function(){});delete F[f];});});
+    case 'delv-yes':var dv=cur;allPh(dv).forEach(function(f){delF(f).catch(function(){});delete F[f];});
       delV(dv.id).catch(function(){});V=V.filter(function(x){return x.id!==dv.id;});cur=null;ui.delV=false;ui.v='home';render();toast('Verslag gewist.');break;
     case 'pdf':makePdf();break;
     case 'share':sharePdf();break;
@@ -538,7 +548,7 @@ document.addEventListener('input',function(e){
 document.addEventListener('change',function(e){
   var el=e.target;
   if(el.dataset&&el.dataset.json){loadJson(el.files&&el.files[0]);el.value='';return;}
-  if(el.dataset&&el.dataset.ph!==undefined){addPhotos(+el.dataset.ph,el.files);el.value='';return;}
+  if(el.dataset&&el.dataset.ph!==undefined){addPhotos(el.dataset.ph,el.files);el.value='';return;}
   if(cur&&el.dataset&&(el.dataset.v==='d'||el.dataset.v==='t'))render();
   if(cur&&el.dataset&&el.dataset.f==='who')useName(el.value);
 });
