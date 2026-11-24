@@ -226,7 +226,7 @@ function verslagPdf(v,o){
   c.need(dl.length*14+80);c.y+=10;doc.rect(M,c.y,doc.w-2*M,dl.length*14+14,PALE);doc.rect(M,c.y,3.5,dl.length*14+14,YEL);
   dl.forEach(function(t,k){doc.text(t,M+14,c.y+18+k*14,10,'F1',INK);});c.y+=dl.length*14+14+22;
   doc.text('Met vriendelijke groeten,',M,c.y,10,'F1',INK);c.y+=16;
-  doc.text('Stalibo bedrijfsgebouwen',M,c.y,10,'F2',NAVY);c.y+=14;
+  doc.text('Laurent Vandeputte',M,c.y,10,'F2',NAVY);c.y+=14;doc.text('Stalibo bedrijfsgebouwen',M,c.y,10,'F1',GREY);c.y+=14;
   footer(doc,'Werfverslag '+(v.pn||'')+' – '+shortD(v.d));
   var data=null;
   if(o.embed!==false&&!fw){
