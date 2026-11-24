@@ -177,7 +177,7 @@ var _line=Doc.prototype.line;Doc.prototype.line=function(x1,y1,x2,y2,col,lw,page
 /* een punt tekenen. label: 'Punt 3' ; pt: {tx,who,ok,ph:[{s,w,h}]} ; o: {photos:true,small:false} */
 function drawPoint(c,label,pt,o){
   var doc=c.doc,W=doc.w,CW=W-2*M,o2=o||{};
-  var who=String(pt.who||'').trim(),right=(who?'Verantwoordelijke: '+who:'')+(pt.ok?(who?'  ·  ':'')+'Afgewerkt':'');
+  var who=String(pt.who||'').trim(),right=(who?(/[,;]/.test(who)?'Verantwoordelijken: ':'Verantwoordelijke: ')+who:'')+(pt.ok?(who?'  ·  ':'')+'Afgewerkt':'');
   var lines=wrap(pt.tx||'',CW,11,'F1');if(!lines.length&&!(pt.ph||[]).length)lines=['(geen tekst)'];
   c.need(22+Math.min(lines.length,3)*15);
   /* kop van het punt */
@@ -185,7 +185,7 @@ function drawPoint(c,label,pt,o){
   doc.text(label,M+11,c.y+14,10,'F2',NAVY);
   if(right){var rx=W-M-8;
     if(pt.ok){var t2='Afgewerkt';doc.rtext(t2,rx,c.y+14,9.5,'F2',OK);rx-=tw(t2,9.5,'F2');if(who){doc.rtext('  ·  ',rx,c.y+14,9.5,'F1',GREY);rx-=tw('  ·  ',9.5,'F1');}}
-    if(who){doc.rtext(who,rx,c.y+14,9.5,'F2',INK);rx-=tw(who,9.5,'F2');doc.rtext('Verantwoordelijke: ',rx,c.y+14,9.5,'F1',GREY);}
+    if(who){doc.rtext(who,rx,c.y+14,9.5,'F2',INK);rx-=tw(who,9.5,'F2');doc.rtext(/[,;]/.test(who)?'Verantwoordelijken: ':'Verantwoordelijke: ',rx,c.y+14,9.5,'F1',GREY);}
   }
   c.y+=30;
   lines.forEach(function(s){c.need(15);doc.text(s,M,c.y+8,11,'F1',INK);c.y+=15;});
@@ -206,10 +206,10 @@ function drawPoint(c,label,pt,o){
 
 /* verslag: {id,p,pn,a,d,t,by,pts:[...]} ; o.embed: gegevens meesturen voor import */
 function verslagPdf(v,o){
-  o=o||{};var doc=new Doc(),pts=v.pts||[];
-  var whoC={};pts.forEach(function(p){var w=String(p.who||'').trim();if(w)whoC[w]=(whoC[w]||0)+1;});
+  o=o||{};var doc=new Doc(),pts0=v.pts||[],pts=pts0,fw=String(o.forWho||'').trim(),idx=pts0.map(function(p,i){return i;});
+  if(fw){var nn=fw.toLowerCase().replace(/\s+/g,' ');idx=idx.filter(function(i){return String(pts0[i].who||'').split(/\s*[,;]\s*/).some(function(x){return x.trim().toLowerCase().replace(/\s+/g,' ')===nn;});});pts=idx.map(function(i){return pts0[i];});}
   var c=new Ctx(doc,function(cc){doc.text((v.pn||'Werf')+'  ·  '+longD(v.d)+'  (vervolg)',M,cc.y+8,9,'F2',GREY);cc.y+=22;});
-  c.y=header(doc,'WERFVERSLAG',v.pn||'Werf',v.a||'',longD(v.d)+(v.t?'  ·  '+v.t:''),'Opgemaakt door Laurent Vandeputte');
+  c.y=header(doc,fw?'WERFVERSLAG  ·  VOOR '+fw.toUpperCase():'WERFVERSLAG',v.pn||'Werf',v.a||'',longD(v.d)+(v.t?'  ·  '+v.t:''),'Opgemaakt door Laurent Vandeputte');
   c.y+=10;
   var aw=(v.aw||[]).filter(function(a){return a&&(a.n||a.f||a.m);});
   if(aw.length){
@@ -219,9 +219,9 @@ function verslagPdf(v,o){
     c.y+=10;
   }
   var ov=(v.ph||[]).filter(function(x){return x&&x.s;});
-  if(String(v.nt||'').trim()||ov.length){drawPoint(c,'Totaalbeeld van de werf',{tx:v.nt||'',ph:ov},{});c.y+=6;}
-  pts.forEach(function(p,i){drawPoint(c,'Punt '+(i+1),p,{});});
-  if(!pts.length&&!String(v.nt||'').trim()&&!ov.length){doc.text('Er staan geen punten in dit verslag.',M,c.y+8,11,'F3',GREY);}
+  if(!fw&&(String(v.nt||'').trim()||ov.length)){drawPoint(c,'Totaalbeeld van de werf',{tx:v.nt||'',ph:ov},{});c.y+=6;}
+  pts.forEach(function(p,i){drawPoint(c,'Punt '+(idx[i]+1),p,{});});
+  if(!pts.length&&(fw||(!String(v.nt||'').trim()&&!ov.length))){doc.text('Er staan geen punten in dit verslag.',M,c.y+8,11,'F3',GREY);}
   var disc='Dit verslag geeft de toestand van de werf weer op het ogenblik van ons bezoek. Opmerkingen of aanvullingen kunnen tot vijf dagen na verzending aan ons worden doorgegeven.',dl=wrap(disc,doc.w-2*M-24,10,'F1');
   c.need(dl.length*14+80);c.y+=10;doc.rect(M,c.y,doc.w-2*M,dl.length*14+14,PALE);doc.rect(M,c.y,3.5,dl.length*14+14,YEL);
   dl.forEach(function(t,k){doc.text(t,M+14,c.y+18+k*14,10,'F1',INK);});c.y+=dl.length*14+14+22;
@@ -229,13 +229,13 @@ function verslagPdf(v,o){
   doc.text('Stalibo bedrijfsgebouwen',M,c.y,10,'F2',NAVY);c.y+=14;
   footer(doc,'Werfverslag '+(v.pn||'')+' – '+shortD(v.d));
   var data=null;
-  if(o.embed!==false){
+  if(o.embed!==false&&!fw){
     data={k:'wv1',io:IO,r:{id:v.id,p:v.p||'',pn:v.pn||'',a:v.a||'',d:v.d||'',t:v.t||'',by:v.by||'',nt:v.nt||'',aw:(v.aw||[]).map(function(a){return {n:a.n||'',f:a.f||'',m:a.m||''};}),ph:ov.map(function(x){return doc.addImg(x);}),
       pts:pts.map(function(p){return {id:p.id||'',tx:p.tx||'',who:p.who||'',ok:!!p.ok,ph:(p.ph||[]).filter(function(x){return x&&x.s;}).map(function(x){return doc.addImg(x);})};})}};
   }
   return doc.blob(data);
 }
-function verslagName(v){return 'Werfverslag '+String(v.pn||'werf').replace(/[\\\/:*?"<>|]+/g,' ').trim()+' '+fileD(v.d)+'.pdf';}
+function verslagName(v,fw){return ('Werfverslag '+String(v.pn||'werf').replace(/[\\\/:*?"<>|]+/g,' ').trim()+' '+fileD(v.d)+(fw?' voor '+fw:'')).replace(/[\\\/:*?"<>|]+/g,' ')+'.pdf';}
 
 /* overzicht: {title,sub,right,groups:[{head,sub,items:[{label,pt}]}],photos} */
 function overzichtPdf(o){
@@ -360,6 +360,8 @@ function allNames(){
   lsGet(RK,[]).forEach(add);((L&&L.n)||[]).forEach(add);
   return out;
 }
+function splitW(s){return String(s||'').split(/\s*[,;]\s*/).map(function(x){return x.trim();}).filter(Boolean);}
+function hasW(s,n){var k=norm(n);return splitW(s).some(function(x){return norm(x)===k;});}
 function useName(n){n=String(n||'').trim();if(!n)return;var a=lsGet(RK,[]).filter(function(x){return norm(x)!==norm(n);});a.unshift(n);lsSet(RK,a.slice(0,30));}
 
 /* ---------- toestand ---------- */
@@ -401,14 +403,14 @@ function fullV(v){
   return {id:v.id,p:v.p,pn:v.pn,a:v.a,d:v.d,t:v.t,by:v.by,nt:v.nt||'',ph:(v.ph||[]).map(function(f){return F[f];}).filter(Boolean),
     pts:(v.pts||[]).filter(function(p){return String(p.tx||'').trim()||(p.ph||[]).length;}).map(function(p){return {id:p.id,tx:p.tx,who:p.who,ok:false,ph:(p.ph||[]).map(function(f){return F[f];}).filter(Boolean)};})};
 }
-function makePdf(){
+function makePdf(fw){
   var v=cur;if(!v)return;
   var miss=allPh(v).filter(function(f){return !F[f];});
   busy('PDF maken…');
   Promise.all(miss.map(function(f){return getF(f).then(function(x){if(x)F[f]=x;});})).then(function(){
     var fv=fullV(v);if(!fv.pts.length&&!String(fv.nt||'').trim()&&!fv.ph.length){ui.busy='';toast('Schrijf eerst een totaalbeeld of minstens één punt.');return;}
-    (v.pts||[]).forEach(function(p){useName(p.who);});if(v.by)lsSet(NK,v.by);
-    var blob=WV.verslagPdf(fv,{embed:true}),name=WV.verslagName(fv);
+    (v.pts||[]).forEach(function(p){splitW(p.who).forEach(useName);});if(v.by)lsSet(NK,v.by);
+    var blob=WV.verslagPdf(fv,{embed:!fw,forWho:fw||''}),name=WV.verslagName(fv,fw);
     ui.pdf={blob:blob,name:name,file:new File([blob],name,{type:'application/pdf'}),kb:Math.round(blob.size/1024)};
     ui.busy='';ui.v='done';render();window.scrollTo(0,0);
   }).catch(function(e){ui.busy='';toast('De pdf kon niet gemaakt worden'+(e&&e.message?': '+e.message:'')+'.');});
@@ -442,7 +444,7 @@ function homeHTML(){
       h+='<button class="item" data-a="open" data-id="'+v.id+'"><span class="m"><b>'+esc(v.pn)+'</b><span class="s">'+esc(WV.shortD(v.d))+' · '+esc(v.t)+' · '+n+(n===1?' punt':' punten')+(f?' · '+f+(f===1?' foto':' foto\'s'):'')+'</span></span>'+(v.sent?'<span class="tg ok">Verstuurd</span>':'<span class="tg">Concept</span>')+'</button>';});
     h+='</div>';}
   h+='<div class="card" style="margin-top:8px"><h2>Instellingen</h2><label class="lab" for="f-naam">Jouw naam (komt op het verslag)</label><input class="in" id="f-naam" data-g="naam" value="'+esc(lsGet(NK,''))+'" autocomplete="name">'+
-    '<p class="hint" style="margin-top:12px;font-size:11px">Werfverslag vs 1.1 · huisstijl</p>'+
+    '<p class="hint" style="margin-top:12px;font-size:11px">Werfverslag vs 1.2</p>'+
     '<p class="hint" style="margin-top:12px">'+(L?'Werflijst: '+werven().length+' werven uit de planning'+(L.at?', van '+esc(WV.shortD(L.at)):'')+'. ':'Nog geen werflijst. ')+'Laad <b>planning.json</b> opnieuw als er werven bijgekomen zijn. Op Android kies je in het venster OneDrive (via ☰ of Bladeren).</p>'+
     (L?'<div style="margin-top:10px">'+jsonBtn('Werven opnieuw laden uit planning.json')+'</div>':'')+
     '<p class="hint" style="margin-top:8px">Tip: zet deze pagina op je startscherm via het menu ⋮ → Toevoegen aan startscherm.</p></div>';
@@ -483,18 +485,19 @@ function editHTML(){
     '<div class="pbtn"><label class="btn sm">'+IC.cam+'Foto nemen<input type="file" accept="image/*" capture="environment" data-ph="ov"></label><label class="btn sm">'+IC.img+'Uit galerij<input type="file" accept="image/*" multiple data-ph="ov"></label></div></section>';
   h+='<datalist id="dl-names">'+names.map(function(n){return '<option value="'+esc(n)+'">';}).join('')+'</datalist>';
   v.pts.forEach(function(p,i){
-    var quick=names.slice(0,8);if(p.who&&!quick.some(function(n){return norm(n)===norm(p.who);}))quick=[p.who].concat(quick.slice(0,7));
+    var quick=names.slice(0,8);splitW(p.who).forEach(function(w){if(!quick.some(function(n){return norm(n)===norm(w);}))quick.unshift(w);});
     h+='<section class="card pt"><div class="hd"><b>Punt '+(i+1)+'</b>'+(ui.del===p.id?'<span style="display:flex;gap:6px"><button class="btn sm" data-a="del-no">Niet</button><button class="btn sm dng" data-a="del-yes" data-i="'+i+'">Verwijderen</button></span>':'<button class="btn sm dng" data-a="del" data-id="'+p.id+'" aria-label="Punt '+(i+1)+' verwijderen">Verwijderen</button>')+'</div>'+
       '<div><label class="sr" for="tx-'+i+'">Tekst van punt '+(i+1)+'</label><textarea class="in" id="tx-'+i+'" data-f="tx" data-i="'+i+'" placeholder="Wat is er vastgesteld, wat moet er gebeuren?">'+esc(p.tx)+'</textarea></div>'+
-      '<div><label class="lab" for="who-'+i+'">Verantwoordelijke</label><input class="in" id="who-'+i+'" data-f="who" data-i="'+i+'" list="dl-names" value="'+esc(p.who)+'" placeholder="Naam (mag leeg)" autocomplete="off">'+
-      (quick.length?'<div class="chips">'+quick.map(function(n){return '<button class="chip'+(norm(n)===norm(p.who)?' on':'')+'" data-a="who" data-i="'+i+'" data-n="'+esc(n)+'">'+esc(n)+'</button>';}).join('')+'</div>':'')+'</div>'+
+      '<div><label class="lab" for="who-'+i+'">Verantwoordelijke(n)</label><input class="in" id="who-'+i+'" data-f="who" data-i="'+i+'" list="dl-names" value="'+esc(p.who)+'" placeholder="Naam of namen met een komma ertussen" autocomplete="off">'+
+      (quick.length?'<div class="chips">'+quick.map(function(n){return '<button class="chip'+(hasW(p.who,n)?' on':'')+'" data-a="who" data-i="'+i+'" data-n="'+esc(n)+'">'+esc(n)+'</button>';}).join('')+'</div>':'')+'</div>'+
       ((p.ph||[]).length?'<div class="ph">'+p.ph.map(function(f,k){var x=F[f];return '<div>'+(x?'<img src="'+x.s+'" alt="Foto '+(k+1)+' bij punt '+(i+1)+'">':'')+'<button data-a="rmf" data-i="'+i+'" data-k="'+k+'" aria-label="Foto verwijderen">×</button></div>';}).join('')+'</div>':'')+
       '<div class="pbtn"><label class="btn sm">'+IC.cam+'Foto nemen<input type="file" accept="image/*" capture="environment" data-ph="'+i+'"></label><label class="btn sm">'+IC.img+'Uit galerij<input type="file" accept="image/*" multiple data-ph="'+i+'"></label></div>'+
     '</section>';
   });
   h+='<button class="btn dash" data-a="addpt">+ Punt toevoegen</button>';
   h+='<div style="margin-top:20px;text-align:center">'+(ui.delV?'<p class="hint" style="margin-bottom:8px">Dit verslag en de foto\'s worden van deze gsm gewist.</p><div class="row"><button class="btn" data-a="delv-no">Niet wissen</button><button class="btn dng" data-a="delv-yes">Ja, wissen</button></div>':'<button class="btn dng sm" data-a="delv">Verslag wissen van deze gsm</button>')+'</div>';
-  h+='</div><div class="bar"><div class="in2"><button class="btn wa" data-a="pdf">Klaar · PDF maken</button></div></div>';
+  var wn=[],ws={};v.pts.forEach(function(p){splitW(p.who).forEach(function(n){if(!ws[norm(n)]){ws[norm(n)]=1;wn.push(n);}});});
+  h+='</div><div class="bar"><div class="in2">'+(wn.length?'<select class="in" data-pff="1" aria-label="Pdf met enkel de punten van één verantwoordelijke" style="margin-bottom:8px"><option value="">Of: pdf enkel voor één verantwoordelijke…</option>'+wn.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('')+'</select>':'')+'<button class="btn wa" data-a="pdf">Klaar · PDF maken</button></div></div>';
   return h;
 }
 function doneHTML(){
@@ -537,7 +540,7 @@ document.addEventListener('click',function(e){
     case 'del':ui.del=el.dataset.id;render();break;
     case 'del-no':ui.del=null;render();break;
     case 'del-yes':var dp=cur.pts.splice(i,1)[0];(dp&&dp.ph||[]).forEach(function(f){delF(f).catch(function(){});delete F[f];});if(!cur.pts.length)cur.pts.push({id:uid('k'),tx:'',who:'',ph:[]});ui.del=null;save();render();break;
-    case 'who':var pp=cur.pts[i];if(pp){pp.who=norm(pp.who)===norm(el.dataset.n)?'':el.dataset.n;save();render();}break;
+    case 'who':var pp=cur.pts[i];if(pp){var lw=splitW(pp.who),n0=el.dataset.n;pp.who=(hasW(pp.who,n0)?lw.filter(function(x){return norm(x)!==norm(n0);}):lw.concat([n0])).join(', ');save();render();}break;
     case 'rmf':var pf=tgt(el.dataset.i),k=+el.dataset.k;if(pf){var fid=pf.ph.splice(k,1)[0];delF(fid).catch(function(){});delete F[fid];save();render();}break;
     case 'delv':ui.delV=true;render();break;
     case 'delv-no':ui.delV=false;render();break;
@@ -556,20 +559,21 @@ document.addEventListener('input',function(e){
   if(!cur)return;
   if(d.v){cur[d.v]=el.value;save();return;}
   if(d.f){var p=cur.pts[+d.i];if(!p)return;p[d.f]=el.value;save();if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=Math.max(96,el.scrollHeight+2)+'px';}
-    if(d.f==='who'){var cs=el.parentNode.querySelectorAll('.chip');Array.prototype.forEach.call(cs,function(c){c.classList.toggle('on',norm(c.dataset.n)===norm(el.value));});}}
+    if(d.f==='who'){var cs=el.parentNode.querySelectorAll('.chip');Array.prototype.forEach.call(cs,function(c){c.classList.toggle('on',hasW(el.value,c.dataset.n));});}}
 });
 document.addEventListener('change',function(e){
   var el=e.target;
   if(el.dataset&&el.dataset.json){loadJson(el.files&&el.files[0]);el.value='';return;}
   if(el.dataset&&el.dataset.ph!==undefined){addPhotos(el.dataset.ph,el.files);el.value='';return;}
   if(cur&&el.dataset&&(el.dataset.v==='d'||el.dataset.v==='t'))render();
-  if(cur&&el.dataset&&el.dataset.f==='who')useName(el.value);
+  if(cur&&el.dataset&&el.dataset.f==='who')splitW(el.value).forEach(useName);
 });
 
 /* ---------- start ---------- */
 render();
 allV().then(function(a){V=a||[];render();}).catch(function(){toast('Deze browser laat niet toe om verslagen te bewaren.');});
 if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
+document.addEventListener('change',function(e){var el=e.target;if(el&&el.dataset&&el.dataset.pff!==undefined&&el.value){var v=el.value;el.value='';makePdf(v);}});
 })();
 </script>
 </body>
